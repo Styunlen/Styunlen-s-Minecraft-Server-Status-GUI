@@ -1,4 +1,4 @@
-# Styunlen-s-Minecrafr-Server-Status-GUI
+# Styunlen-s-Minecraft-Server-Status-GUI
 我的MC私人服务器的状态获取器
 
 > <font size=24>
