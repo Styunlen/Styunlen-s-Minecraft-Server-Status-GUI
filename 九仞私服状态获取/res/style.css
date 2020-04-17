@@ -1,0 +1,110 @@
+/*CSS DOCUMENT*/
+*{margin: 0;padding: 0;color:#fff}
+
+#Title{display:block;text-align:center;}
+body{
+  /* background-image: url("https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1585396635785&di=cb0cec85749393e667e763c86ccfa923&imgtype=0&src=http%3A%2F%2Fi2.hdslb.com%2Fbfs%2Farchive%2F2579d158f7ff3e12ff30b52d688143beab11f2f8.jpg"); */
+  background-image: url("./bg.png");
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+.btn
+{
+  border-color: #4b48d6;
+  border-style: solid;
+  border-width: 2px;
+  color: #fff;
+  padding: 10px 20px 10px;
+}
+.btn.btn-primary {
+  background: #5755d9;
+  border-color: #4b48d6;
+  color: #fff;
+  padding: 10px 20px 10px;
+  font-size: 24px;
+}
+.btn.btn-primary:focus {
+  background: #5755d9;
+  border-color: #000;
+  color: #fff;
+  padding: 10px 20px 10px;
+  font-size: 24px;
+  box-shadow: 0px 0px 1px 3px #fff;
+  transition: all 2s;
+}
+.btn.btn-primary:hover {
+  background: #5755d9;
+  border-color: #000;
+  color: #fff;
+  padding: 10px 20px 10px;
+  font-size: 24px;
+  /*box-shadow: 0px 0px 1px 2px #fff;*/
+  transition: all 2s;
+}
+.btn.btn-primary:active {
+  background: #5755d9;
+  border-color: #000;
+  transform: scale(0.95,0.95);
+  color: #fff;
+  padding: 10px 20px 10px;
+  font-size: 24px;
+  box-shadow: 0px 0px 1px 3px #fff;
+}
+#btn1
+{
+  position: absolute;
+  top:100px;
+  left: 300px;
+}
+cserstatus {  
+  prototype: CSerStatus url(class.tis);
+  display:inline-block;
+}
+
+
+#btnRefresh:hover {
+  transform: scale(0.95,0.95); 
+}
+
+#btnRefresh:active {
+  transform: scale(0.90,0.90); 
+}
+/* .btn{
+    background: #fff;
+    border: 0.8px solid #5755d9;
+    border-radius: 0.0625px;
+    color: #5755d9;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 16px;
+    height: 50px;
+    line-height: 19.2px;
+    outline: 0;
+    padding: 4px 6.4px;
+    text-align: center;
+    text-decoration: none;
+    transition: background .2s,border .2s,box-shadow .2s,color .2s;
+    vertical-align: middle;
+	white-space: nowrap;
+	width:auto;
+}
+
+.btn-group {
+    display: inline-flex;
+    display: -ms-inline-flexbox;
+} */
+
+/* hello {  
+  prototype: Hello url(class.tis);
+  display:block;
+  z-index:188;
+}
+
+hello:expanded > h1 {
+  font-size: 30px;
+}
+button{width: 20px;color: rgb(0, 0, 0);}
+hello:collapsed > h1 {
+  font-size: 10px;
+} */

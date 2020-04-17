@@ -1,0 +1,81 @@
+﻿<!Doctype html>
+<html>
+<head>
+	<title>九仞の私服————当前状态</title>
+    <link rel="stylesheet" type="text/css" href="flat-theme.css">
+    <link rel="stylesheet" type="text/css" href="layout.css">
+    <link rel="stylesheet" type="text/css" href="style.css">
+    <link rel="shortcuticon" href="./favicon.ico" />
+	<!--<style src="style.css" />-->
+	<meta charset="utf-8">
+    <script type="text/tiscript">
+    event click $(#btnRefresh){
+        view.DoTask();
+    }
+    //var StatusHasChanged = false;
+    function self.ready() {
+        var (sx,sy,sw,sh) = view.screenBox(#workarea,#rectw);
+        var (w,h) = self.$(body);//.box(#dimension); // getting declared dimension
+        w = 450;
+        h = 450;
+        stdout.println("width:" + w + " heigh :" + h);
+        view.windowIcon = "./favicon.ico";
+        view.windowResizable = false;
+        view.move( sx + (sw - w) / 2, sy + (sh - h) / 2, w, h);//移动居中
+        view.DoTask();
+        self.timer(5s, ::CheckGetState());
+    }
+    function CheckGetState()
+    {
+        stdout.println("func called");
+        if($(cserstatus).html == "<div id=\"statusDot\" style=\"display:inline-block;width:10px;height:10px;border-radius:5px;background:gray;\"></div><span style=\"padding-left:10px;display:inline-block;width:60px;\">获取中...</span>")
+        {
+            $(cserstatus).html = "<div id=\"statusDot\" style=\"display:inline-block;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"padding-left:10px;display:inline-block;width:80px;\">获取超时</span>";
+        }
+    }
+    function SetSerStatus(s)
+    {
+
+        $(cserstatus).html = s.toHtmlString();
+    }
+    function SetPlayerNum(online,max)
+    {
+        //stdout.println("online " + online + " max " + max);
+        $(#playerNum).html = online.toHtmlString() + " / " + max.toHtmlString();
+    }
+    function SetMotd(motd)
+    {
+        //stdout.println(motd);
+        $(#motd).html = motd.toHtmlString();
+    }
+    function DebugLog(s)
+    {
+        stdout.println(s);
+    }
+    </script>
+	<style>
+		
+	</style>
+</head>
+<body style="font-size: 16px;">
+	<header>
+        <span id="Title">服务器状态</span>
+        <hr>	
+	</header>
+    <button class="" id="btnRefresh" style="position:absolute;top:130px;left:30px;"role="default-button">点我刷新</button>
+    <p style="position:absolute;top:180px;left:15px;"role="default-button">刷新不要过于频繁</p>
+	<div id="NowStatusGroup">
+		<span style="display:inline-block;padding-right:10px;">当前状态:</span>
+		<cserStatus></cserStatus>
+	</div>
+	<div id="OnlineNumGroup">
+		<span style="display:inline-block;padding-right:10px;">在线人数: </span>
+        <span id ="playerNum" style="display:inline-block;padding-right:10px;"></span>
+	</div>
+    <div id="MotdGroup">
+        <span style="display:inline-block;padding-right:10px;">服务器标语: </span>
+        <span id="motd" style="display:inline-block;padding-right:10px;"></span>
+    </div>
+    <span style="position:absolute;bottom:0px;left:0px;">v1.0</span>
+</body>
+</html>

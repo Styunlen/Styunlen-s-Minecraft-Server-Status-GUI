@@ -1,0 +1,29 @@
+class Hello : Element 
+{
+  function attached() {
+    var message = this.attributes["message"] || "none";
+    this.$content(<h1>{message}</h1><button.expand>+</button><button.collapse>-</button>);
+  }
+  /*event click $(button.expand) {
+    this.state.expanded = true;
+  }
+  event click $(button.collapse) {
+    this.state.collapsed = true;
+  } */
+  
+}
+class CSerStatus : Element 
+{
+  function attached() {
+    this.$content(<div id="statusDot" style="display:inline-block;width:10px;height:10px;border-radius:5px;background:gray;"></div><span style="padding-left:10px;display:inline-block;width:60px;">获取中...</span>);
+  }
+  function updateStatus() {
+	this.$content(<div id="statusDot" style="display:inline-block;width:10px;height:10px;border-radius:5px;background:green;color:green;"></div><span style="padding-left:10px;display:inline-block;width:60px;">在线</span>);
+  }
+  /*event click $(button.expand) {
+    this.state.expanded = true;
+  }
+  event click $(button.collapse) {
+    this.state.collapsed = true;
+  } */
+}

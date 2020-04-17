@@ -1,0 +1,30 @@
+﻿  bg.png 358567
+  class.tis 1056 compressed to 476 (45%)
+  favicon.ico 67646 compressed to 5862 (8%)
+  flat-theme.css 12093 compressed to 4517 (37%)
+  layout.css 110
+  main.htm 3155 compressed to 1578 (50%)
+  refresh.png 114
+  spectre-exp.css 27459 compressed to 6844 (24%)
+  spectre-exp.min.css 23599 compressed to 6212 (26%)
+  spectre-icons.css 10616 compressed to 3068 (28%)
+  spectre-icons.min.css 8854 compressed to 2766 (31%)
+  spectre.css 61546 compressed to 19431 (31%)
+  spectre.min.css 45964 compressed to 15600 (33%)
+  style.css 2424 compressed to 1261 (52%)
+  -----------------------------
+  compressed size 427698 bytes
+  resources not changed
+  CwssRecver.cpp
+CwssRecver.cpp(56): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(157): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(252): warning C4267: “=”: 从“size_t”转换到“short”，可能丢失数据
+CwssRecver.cpp(262): warning C4267: “=”: 从“size_t”转换到“short”，可能丢失数据
+CwssRecver.cpp(273): warning C4267: “=”: 从“size_t”转换到“short”，可能丢失数据
+  正在生成代码
+  1 of 480 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    1 functions had inline decision re-evaluated but remain unchanged
+  已完成代码的生成
+  九仞私服状态获取.vcxproj -> F:\bcml\VS\vscode project\mc server status\x64\Release\九仞私服状态获取.exe
+  九仞私服状态获取.vcxproj -> F:\bcml\VS\vscode project\mc server status\x64\Release\九仞私服状态获取.pdb (Full PDB)
