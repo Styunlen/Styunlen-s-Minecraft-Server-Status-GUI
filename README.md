@@ -9,4 +9,8 @@
 </font>
 <hr>
 
-<center>![preview](https://raw.githubusercontent.com/Styunlen/Styunlen-s-Minecrafr-Server-Status-GUI/master/%E4%B9%9D%E4%BB%9E%E7%A7%81%E6%9C%8D%E7%8A%B6%E6%80%81%E8%8E%B7%E5%8F%96/Preview%20images/v1.0.png)</center>
+<center>
+  
+![preview](https://raw.githubusercontent.com/Styunlen/Styunlen-s-Minecrafr-Server-Status-GUI/master/%E4%B9%9D%E4%BB%9E%E7%A7%81%E6%9C%8D%E7%8A%B6%E6%80%81%E8%8E%B7%E5%8F%96/Preview%20images/v1.0.png)
+
+</center>
