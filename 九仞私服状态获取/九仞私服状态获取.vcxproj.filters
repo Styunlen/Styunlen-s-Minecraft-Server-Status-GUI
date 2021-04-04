@@ -24,12 +24,18 @@
     <ClCompile Include="CwssRecver.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="base64.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="include\sciter-x-window.hpp">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="CwssRecver.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="base64.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -55,6 +61,9 @@
       <Filter>资源文件</Filter>
     </None>
     <None Include="postion.css">
+      <Filter>资源文件</Filter>
+    </None>
+    <None Include="res\scripts.tis">
       <Filter>资源文件</Filter>
     </None>
   </ItemGroup>
