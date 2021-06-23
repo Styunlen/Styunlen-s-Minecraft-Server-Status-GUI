@@ -7,9 +7,9 @@ function movable() // install movable window handler
     stdout.println($(body));
     function doDrag() {
         while (dragging) {
-            var (x,y) = view.box(#position,#border,#screen);
+            var (x, y) = view.box(#position,#border,#screen);
             //stdout.printf("Border(x:%d,y:%d)",x,y);
-            (x,y) = view.box(#position,#client,#screen);
+            (x, y) = view.box(#position,#client,#screen);
             //stdout.printf(",Client(x:%d,y:%d)\n",x,y);
             view.doEvent();
         }
@@ -56,3 +56,138 @@ function movable() // install movable window handler
     view.root.subscribe(onKeyDown, Event.KEY, Event.KEY_DOWN);
     return false;
 }
+
+var serverInfo = {
+    serverAddr:"localhost",
+    serverPort: "25565"
+}
+
+var serverSelected = "";
+event click $(#serverInfo>tbody>tr)
+{
+    serverSelected = this.attributes["value"];
+    stdout.printf("%v\r\n", this.attributes["value"],self.$(tr[value='{serverSelected}']));
+}
+
+event click $(#menu_table_delete)
+{
+    if(serverSelected != "")
+    {
+        self.$(tr[value='{serverSelected}']).remove();
+        serverSelected = "";
+    }
+}
+
+event click $(#btnRefresh){
+    view.DoTask($(#serverAddr).value, $(#serverPort).value);
+}
+
+event click $(#btnAppend){
+    serverInfo.serverAddr = $(#serverAddr).value;
+    serverInfo.serverPort = $(#serverPort).value;
+    view.DoTask($(#serverAddr).value, $(#serverPort).value);
+}
+//var StatusHasChanged = false;
+function self.ready() {
+    var (sx, sy, sw, sh) = view.screenBox(#workarea,#rectw);
+    var (w, h) = self.$(body);//.box(#dimension); // getting declared dimension
+    w = 900;
+    h = 600;
+    stdout.println("width:" + w + " heigh :" + h);
+    view.windowIcon = "./favicon.ico";
+    view.windowResizable = false;
+    view.move(sx + (sw - w) / 2, sy + (sh - h) / 2, w, h);//移动居中
+}
+function GetJsonFieldFromJsonString(jsonStr, field) {
+    //stdout.println("jsonstr:",jsonStr,"jsonField:",field);
+    var v = JSON.parse(jsonStr);
+    function formatVal(varval) {
+        if (varval === null)
+            return ("null", false);
+        else if (varval === undefined)
+            return ("undefined", false);
+        switch (typeof varval) {
+            case #boolean:
+                return (varval.toString(), false);
+            case #object:
+                return (String.printf("%v", varval), #object);//其实还可以用JSON.stringify()函数来将varval转换成string
+            case #array:
+                return (String.printf("%v", varval), #array);
+            case #date:
+                return (varval.toISOString(), false);
+            case #string:
+            case #integer:
+            case #float:
+                return (JSON.stringify(varval), false);
+            case #symbol:
+                return (varval.toString(), false);
+            default:
+                return (varval.toString(), false);
+        }
+    }
+    for (var (varname, varval) in v ) {
+        if (varname == field) {
+            var (caption, compound) = formatVal(varval);
+            //stdout.println("varval:",String.printf("%v",varval), "JSON.stringify(varval):",JSON.stringify(varval));
+            return String.printf("%v", varval);
+        }
+    }
+    return "Can't find this field";
+}
+
+function GetMotdType(varval) {
+    var v = JSON.parse(varval);
+    var ret;
+    try {
+        ret = String.printf("%s", typeof (v.extra));
+    }
+    catch (e) {
+        ret = "NULL";
+    }
+    return ret;
+}
+
+function TranslateExtraMotd(varval) {
+    var v = JSON.parse(varval);
+    var ret = "";
+    for (var item in v.extra) {
+        stdout.println(String.printf("<span style=\"color:%s;\">%s</span>", item.color, item.text));
+        switch (item.color) {
+            case "light_purple":
+                ret += String.printf("<span style=\"color:%s;\">%s</span>", "#ff55ff", item.text);
+                break;
+            case "dark_green":
+                ret += String.printf("<span style=\"color:%s;\">%s</span>", "#009600", item.text);
+                break;
+            default:
+                ret += String.printf("<span style=\"color:%s;\">%s</span>", item.color, item.text);
+                break;
+        }
+    }
+    return ret;
+}
+
+function DebugLog(s) {
+    stdout.println(s);
+}
+
+function AddServerInfo(favicon, status, motd, online) {
+    stdout.println(favicon, status, motd, online);
+    var trValue = serverInfo.serverAddr + serverInfo.serverPort;
+    var el = Element.create([tr: { value: trValue, role: "option" }]);
+    $(tbody).append(el);
+    el.$append(<td><img src="{favicon}" /></td>);
+    el.$append(<td>{status}</td>);
+    el.$append(<td></td>).html = motd;
+    el.$append(<td>{online}</td>);
+}
+self.on("complete",
+    function () {
+        movable();
+        stdout.println("got complete");
+        //view.DoTask($(#serverAddr).value,$(#serverPort).value);
+        //self.timer(5s, ::CheckGetState());
+        $(#EngineVer).text = String.printf("Sciter: %d.%d.%d.%d.%s",
+            (Sciter.VERSION >> 16) & 0xffff, Sciter.VERSION & 0xffff,
+            (Sciter.REVISION >> 16) & 0xffff, Sciter.REVISION & 0xffff, Sciter.BUILD.toString());
+    });

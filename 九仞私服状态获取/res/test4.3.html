@@ -1,0 +1,56 @@
+﻿<!Doctype html>
+<html>
+<head>
+	<title>九仞の私服————当前状态</title>
+    <link rel="stylesheet" type="text/css" href="flat-theme.css">
+	<meta charset="utf-8">
+    <script type="text/tiscript">
+        function AddServerInfo(favicon,status,motd,online)
+        {
+            var el = Element.create([tr: {value:"1", role:"option"}]);
+            $(tbody).append(el);
+            el.$append(<td><img src={favicon}/></td>);
+            el.$append(<td>{status}</td>);
+            el.$append(<td></td>).html = motd;
+            el.$append(<td>{online}</td>);     
+        }
+        self.on("complete",
+            function() {
+                AddServerInfo("ImgErr.jpg","online","motd","233/233")
+                AddServerInfo("ImgErr.jpg","online","motd<span style=\"color:red;\">233</span>","232/233")
+                AddServerInfo("ImgErr.jpg","online","motd","231/233")
+            }
+        );
+    </script>
+	<style>
+        table {
+          //flow: table-fixed;
+          width:*;
+          height:*;
+          border:1dip solid grey;
+        }
+        td>img{width:64px;height:64px;}
+        tbody
+        { 
+          behavior: select-multiple;
+          height:*; 
+          width:*;
+          padding:0; 
+        }
+        tbody tr:checked { background:highlight; color:highlighttext; }
+	</style>
+</head>
+<body style="font-size: 16px;">
+    <table>
+        <thead>
+          <tr><th>Icons</th>
+              <th>status</th>
+              <th>Motd</th>
+              <th>OnlineInfo</th>
+          </tr>
+        </thead>
+            <tbody>
+            </tbody>
+      </table>      
+</body>
+</html>

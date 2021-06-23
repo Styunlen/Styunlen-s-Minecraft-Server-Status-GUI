@@ -8,7 +8,9 @@
 #include <thread>
 #include <direct.h>
 #include "base64.h"
+#include "stringTools.h"
 #include "sciter-x-window.hpp"
+#include <io.h>
 #pragma comment(lib, "ws2_32.lib")
 using namespace std;
 
@@ -36,9 +38,9 @@ public:
 	~CwssRecver();
 	bool AsyncGet(string serverAddr, string serverPort);
 	void SetFlag(int i);
-	string GetOnlinePlayer();
-	string GetMaxPlayer();
-	string GetMotd();
+	wstring GetOnlinePlayer();
+	wstring GetMaxPlayer();
+	wstring GetMotd();
 	string GetLastStateInfo();
 	string GetFavicon();
 	bool init();
@@ -46,9 +48,9 @@ public:
 	friend bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort);
 private:
 	struct { 
-		string maxPlayer;
-		string onlinePlayer;
-		string motd;
+		wstring maxPlayer;
+		wstring onlinePlayer;
+		wstring motd;
 		string favicon;
 	} m_status;
 	/*标志获取状态
@@ -63,3 +65,11 @@ private:
 	*/
 	enum { FSUCCESSFUL, FRAW, FINITFAILED, FCSFAILED, FGHFAILED, FCONFAILED, FSENDFAILED, FRECVFAILED} iGetFlag = FRAW;
 };
+
+/* Sciter的脚本已经提供了诸多方法，这个文件用于前后端之间的方法交换，
+意思是说后端的一些功能实现起来过于复杂，还不如用前端的脚本来帮助后端实现一些复杂功能
+比如JSON字符串的读取
+*/
+
+wstring GetJsonFieldFromJsonString(string json, string jsonField);
+wstring GetJsonFieldFromJsonString(wstring json, string jsonField);

@@ -1,30 +1,41 @@
 ﻿  bg.png 358567
-  class.tis 1056 compressed to 476 (45%)
+  class.tis 1093 compressed to 494 (45%)
   favicon.ico 67646 compressed to 5862 (8%)
   flat-theme.css 12093 compressed to 4517 (37%)
+  flat-theme.tis 1761 compressed to 925 (52%)
+  ImgErr.jpg 20802
   layout.css 110
-  main.htm 3155 compressed to 1578 (50%)
+  main.htm 6403 compressed to 2733 (42%)
   refresh.png 114
-  spectre-exp.css 27459 compressed to 6844 (24%)
+  scripts.tis 1723 compressed to 768 (44%)
+  spectre-exp.css 28685 compressed to 6945 (24%)
   spectre-exp.min.css 23599 compressed to 6212 (26%)
-  spectre-icons.css 10616 compressed to 3068 (28%)
+  spectre-icons.css 11212 compressed to 3099 (27%)
   spectre-icons.min.css 8854 compressed to 2766 (31%)
-  spectre.css 61546 compressed to 19431 (31%)
+  spectre.css 65263 compressed to 19784 (30%)
   spectre.min.css 45964 compressed to 15600 (33%)
-  style.css 2424 compressed to 1261 (52%)
+  style.css 2767 compressed to 1452 (52%)
+  test4.3.html 1677 compressed to 922 (54%)
+  test4.4.html 1699 compressed to 930 (54%)
   -----------------------------
-  compressed size 427698 bytes
+  compressed size 454322 bytes
   resources not changed
+  base64.cpp
+base64.cpp(70): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
+base64.cpp(86): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
   CwssRecver.cpp
-CwssRecver.cpp(56): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-CwssRecver.cpp(157): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
-CwssRecver.cpp(252): warning C4267: “=”: 从“size_t”转换到“short”，可能丢失数据
-CwssRecver.cpp(262): warning C4267: “=”: 从“size_t”转换到“short”，可能丢失数据
-CwssRecver.cpp(273): warning C4267: “=”: 从“size_t”转换到“short”，可能丢失数据
-  正在生成代码
-  1 of 480 functions ( 0.2%) were compiled, the rest were copied from previous compilation.
-    0 functions were new in current compilation
-    1 functions had inline decision re-evaluated but remain unchanged
-  已完成代码的生成
-  九仞私服状态获取.vcxproj -> F:\bcml\VS\vscode project\mc server status\x64\Release\九仞私服状态获取.exe
-  九仞私服状态获取.vcxproj -> F:\bcml\VS\vscode project\mc server status\x64\Release\九仞私服状态获取.pdb (Full PDB)
+CwssRecver.cpp(38): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(38): warning C4267: “参数”: 从“size_t”转换到“UINT”，可能丢失数据
+CwssRecver.cpp(40): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(40): warning C4267: “参数”: 从“size_t”转换到“UINT”，可能丢失数据
+CwssRecver.cpp(50): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(50): warning C4267: “参数”: 从“size_t”转换到“UINT”，可能丢失数据
+CwssRecver.cpp(52): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(52): warning C4267: “参数”: 从“size_t”转换到“UINT”，可能丢失数据
+CwssRecver.cpp(128): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(243): warning C4267: “参数”: 从“size_t”转换到“int”，可能丢失数据
+CwssRecver.cpp(392): warning C4267: “初始化”: 从“size_t”转换到“int”，可能丢失数据
+  “D:\VS2015\VC\bin\x86_amd64\CL.exe”中的内部编译器错误
+    请选择 Visual C++ 
+  “帮助”菜单上的“技术支持”命令，或打开技术支持帮助文件来获得详细信息
+C:\Program Files (x86)\MSBuild\Microsoft.Cpp\v4.0\V140\Microsoft.CppCommon.targets(356,5): error MSB6006: “CL.exe”已退出，代码为 2。

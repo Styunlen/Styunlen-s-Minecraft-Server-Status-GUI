@@ -70,6 +70,24 @@ cserstatus {
 #btnRefresh:active {
   transform: scale(0.90,0.90); 
 }
+
+table {
+    //flow: table-fixed;
+    width:800px;
+    height:300px;
+    overflow-y:auto;
+    border:1dip solid grey;
+}
+td>img{width:64px;height:64px;}
+tbody
+{ 
+    behavior: select-multiple;
+    height:*; 
+    width:*;
+    padding:0; 
+    text-align:center;
+}
+tbody tr:checked { background:highlight; color:highlighttext; }
 /* .btn{
     background: #fff;
     border: 0.8px solid #5755d9;

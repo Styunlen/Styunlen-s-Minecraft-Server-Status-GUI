@@ -1,23 +1,20 @@
 ﻿  bg.png 358567
   class.tis 1093 compressed to 494 (45%)
+  delete.png 3328
   favicon.ico 67646 compressed to 5862 (8%)
   flat-theme.css 12093 compressed to 4517 (37%)
   flat-theme.tis 1761 compressed to 925 (52%)
+  ImgErr.jpg 20802
   layout.css 110
-  main.htm 5155 compressed to 2340 (45%)
-  refresh.png 114
-  scripts.tis 1723 compressed to 768 (44%)
-  spectre-exp.css 28685 compressed to 6945 (24%)
-  spectre-exp.min.css 23599 compressed to 6212 (26%)
-  spectre-icons.css 11212 compressed to 3099 (27%)
-  spectre-icons.min.css 8854 compressed to 2766 (31%)
-  spectre.css 65263 compressed to 19784 (30%)
-  spectre.min.css 45964 compressed to 15600 (33%)
-  style.css 2424 compressed to 1261 (52%)
-  test.html 1674 compressed to 884 (52%)
-  test.png 5441
+  main.htm 2804 compressed to 1379 (49%)
+  refresh.png 6520
+  scripts.tis 6294 compressed to 2740 (43%)
+  style.css 2767 compressed to 1452 (52%)
+  test4.3.html 1677 compressed to 922 (54%)
+  test4.4.html 1699 compressed to 930 (54%)
+  top.png 5942
   -----------------------------
-  compressed size 437261 bytes
+  compressed size 415874 bytes
   resources not changed
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.exe
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.pdb (Full PDB)

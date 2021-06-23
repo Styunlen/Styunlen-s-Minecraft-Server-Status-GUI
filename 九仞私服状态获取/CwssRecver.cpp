@@ -9,6 +9,16 @@ CwssRecver g_cr = CwssRecver();
 /********************
 	公共方法定义区
 ********************/
+//调用前端方法，解析json字符串
+wstring GetJsonFieldFromJsonString(string json, string jsonField)
+{
+	return pwin->call_function("GetJsonFieldFromJsonString", json.c_str(), jsonField.c_str()).to_string().c_str();
+}
+wstring GetJsonFieldFromJsonString(wstring json, string jsonField)
+{
+	return pwin->call_function("GetJsonFieldFromJsonString", json.c_str(), jsonField.c_str()).to_string().c_str();
+}
+
 //获取当前工作目录
 string	getCurrentWorkDir()
 {
@@ -34,6 +44,18 @@ std::string WcharToChar(const wchar_t* wp, size_t m_encode = CP_ACP)
 	return str;
 }
 
+std::wstring CharToWchar(const char* c, size_t m_encode = CP_ACP)
+{
+	std::wstring str;
+	int len = MultiByteToWideChar(m_encode, 0, c, strlen(c), NULL, 0);
+	wchar_t*	m_wchar = new wchar_t[len + 1];
+	MultiByteToWideChar(m_encode, 0, c, strlen(c), m_wchar, len);
+	m_wchar[len] = '\0';
+	str = m_wchar;
+	delete m_wchar;
+	return str;
+}
+
 char * WsGetErrorInfo()
 {
 	static CHAR pBuf[1024] = { 0 };
@@ -54,7 +76,33 @@ char * WsGetErrorInfo()
 		NULL);
 	if (retSize > 0) {
 		pTemp[wcslen(pTemp) - 2] = '\0'; //remove cr and newline character
-		sprintf_s(pBuf, bufSize, "%0.*s", bufSize, pTemp);
+		sprintf_s(pBuf, bufSize, "%0.*ws", bufSize, pTemp);
+		LocalFree((HLOCAL)pTemp);
+	}
+	return pBuf;
+}
+
+char * WsGetErrorInfo(DWORD err)
+{
+	static CHAR pBuf[1024] = { 0 };
+	const ULONG bufSize = 1024;
+	DWORD retSize;
+	LPTSTR pTemp = NULL;
+
+	pBuf[0] = '0';
+
+	retSize = FormatMessage(FORMAT_MESSAGE_ALLOCATE_BUFFER |
+		FORMAT_MESSAGE_FROM_SYSTEM |
+		FORMAT_MESSAGE_ARGUMENT_ARRAY,
+		NULL,
+		err,
+		LANG_NEUTRAL,
+		(LPTSTR)&pTemp,
+		0,
+		NULL);
+	if (retSize > 0) {
+		pTemp[wcslen(pTemp) - 2] = '\0'; //remove cr and newline character
+		sprintf_s(pBuf, bufSize, "%0.*ws", bufSize, pTemp);
 		LocalFree((HLOCAL)pTemp);
 	}
 	return pBuf;
@@ -109,7 +157,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	iResult = getaddrinfo(serverAddr.c_str(), serverPort.c_str(), &hints, &result);
 	if (iResult != 0) {
 		string logstr = "域名解析失败 : ";
-		logstr += iResult;
+		logstr += WcharToChar(gai_strerror(iResult));
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
 		cr->iGetFlag = cr->FGHFAILED;
@@ -139,7 +187,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		ClientSocket = socket(pres->ai_family, pres->ai_socktype, pres->ai_protocol);
 		if (ClientSocket == INVALID_SOCKET) {
 			string logstr = "创建套接字失败 : ";
-			logstr += WSAGetLastError();
+			logstr +=  WsGetErrorInfo(WSAGetLastError());
 			logstr += " \n";
 			pwin->call_function("DebugLog", logstr);
 			freeaddrinfo(result);
@@ -153,7 +201,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 			/*待优化*/
 			char addrStr[INET_ADDRSTRLEN];
 			const char *paddrStr = inet_ntop(AF_INET, &((SOCKADDR_IN*)&(pres->ai_addr))->sin_addr, addrStr, sizeof(addrStr));
-			logstr += WSAGetLastError();
+			logstr += WsGetErrorInfo(WSAGetLastError());
 			logstr += paddrStr;
 			logstr += " 连接失败";
 			logstr += " \n";
@@ -182,8 +230,14 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	packstr += '\x00';
 	packstr += '\x00';
 	packstr += pack_data(serverAddr.c_str()); //包装域名信息
-	packstr += "\xfe\x1b\x01";//端口65051的十六进制表示
-	short test = 65051;
+	char* portStrHex = new char[16]{0};
+	short port = short(atoi(serverPort.c_str()));
+	//sprintf_s(portStrHex,15, "%x", port);
+	portStrHex[0] = port >> 8;
+	portStrHex[1] = port & 0x00FF;
+	portStrHex[2] = '\x01';
+	packstr += portStrHex;//包装端口信息
+	delete[] portStrHex;
 	packstr = pack_data(packstr);
 	memcpy_s(str, 64, packstr.c_str(), packstr.length());
 	iResult = send(ClientSocket, (char*)str, packstr.length(), 0);
@@ -191,7 +245,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	cr->iGetFlag = cr->FSENDFAILED;
 	if (iResult == SOCKET_ERROR) {
 		string logstr = "发送失败! ";
-		logstr += WSAGetLastError();
+		logstr += WsGetErrorInfo(WSAGetLastError());
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
 		closesocket(ClientSocket);
@@ -216,7 +270,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	printf_s(WsGetErrorInfo());
 	if (iResult == SOCKET_ERROR) {
 		string logstr = "发送失败! ";
-		logstr += WSAGetLastError();
+		logstr += WsGetErrorInfo(WSAGetLastError());
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
 		closesocket(ClientSocket);
@@ -232,14 +286,23 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	}
 	byte recvbuf[1025]{ 0 };
 	recvbuf[1024] = '\0';
+#ifdef  _DEBUG
+	byte* temp = new byte[1024 * 64];
+	unsigned int tempIndex = 0;
+#endif
 	wstring allRecv;
+	string ascAllRecv;
 	iResult = 1;
 	//Server返回的数据包中会包含数据包长度前缀，这段代码表示去除前缀，直到遇到json文本开头的{
 	for (int i = 0; iResult > 0 && recvbuf[0] != '{'; i++)
 	{
 		iResult = recv(ClientSocket, (char*)recvbuf, 1, 0);
 	}
-	allRecv += recvbuf[0];
+	allRecv += recvbuf[0]; //将json开头的括号加回
+	ascAllRecv += recvbuf[0];
+#ifdef  _DEBUG
+	temp[tempIndex++] = recvbuf[0];
+#endif
 	iResult = recv(ClientSocket, (char*)recvbuf, 1024, 0);
 	while (iResult > 0)
 	{
@@ -249,87 +312,72 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		pwin->call_function("DebugLog", logstr);
 		for (int i = 0; i < iResult; i++)
 		{
-			//if (recvbuf[i] > 128) //传输时用的是UTF8编码
-			//{
-			//string chrU16BE;
-			//chrU16BE += recvbuf[i] & 0xff;
-			//chrU16BE += recvbuf[i + 1] & 0xff;
-			//wchar_t test = (recvbuf[i] << 8) | (recvbuf[i + 1]);
-			//wstring chr = std::wstring_convert< std::codecvt_utf8<wchar_t>, wchar_t >{}.from_bytes(chrU16BE);
-			//setlocale(LC_ALL, "");
-			//printf_s("%ls", chr.c_str());
-			//pwin->call_function("DebugLog", chr.c_str());
-			//allRecv += std::wstring_convert< std::codecvt_utf8<wchar_t>, wchar_t >{}.to_bytes(chr);
-			//i++;
-			//continue;
-			//}
-			//pwin->call_function("DebugLog", sciter::value((char)recvbuf[i]));
 			allRecv += recvbuf[i];
-
+			ascAllRecv += recvbuf[i];
+#ifdef  _DEBUG
+			temp[tempIndex] = recvbuf[i];
+			tempIndex++;
+#endif
 		}
-		//pwin->call_function("DebugLog", "\n");
-		if (iResult != 1024)
+		if (iResult != 1024)//小于1024说明是最后一次发送
 			break;
 		iResult = recv(ClientSocket, (char*)recvbuf, 1024, 0);
 	}
 	if (iResult == SOCKET_ERROR) {
 		string logstr = "接收失败";
-		logstr += WSAGetLastError();
+		logstr += WsGetErrorInfo(WSAGetLastError());
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
 		closesocket(ClientSocket);
 		cr->iGetFlag = cr->FRECVFAILED;
 		return false;
 	}
+#ifdef  _DEBUG
+	{
+		FILE *fp;
+		string faviconPath = getCurrentWorkDir() + "\\ServerIcons\\";
+		if (_access(faviconPath.c_str(), 0) == -1)//文件夹不存在时，创建文件夹
+			_mkdir(faviconPath.c_str());
+		faviconPath = faviconPath + serverAddr.c_str() + ".txt";//将img写入到文件中
+		fopen_s(&fp, faviconPath.c_str(), "wb");
+		for (int i = 0; i < tempIndex; i++)
+		{
+			fprintf_s(fp, "%c", temp[i]);
+		}
+		fclose(fp);
+	}
+#endif
+	allRecv = UTF8ToUnicode(ascAllRecv);
 	pwin->call_function("DebugLog", "\n-----------------------------\n");
+	pwin->call_function("DebugLog", sciter::value(allRecv));
+	pwin->call_function("DebugLog", "\n-----------------------------\n");
+#ifdef  _DEBUG
+	delete[] temp;
+#endif
 	if ((allRecv.length() != 0) && (allRecv.find(L"online") != allRecv.npos))
 	{
-		short iPos, iOnlinePos, iMaxPos, iMotdPos;
-		iOnlinePos = allRecv.find(L"online");
-		iPos = iOnlinePos + 8;
-		pwin->call_function("DebugLog", "当前在线人数: ");
-		while (allRecv[iPos] != '}' && allRecv[iPos] != ',')
+		cr->m_status.onlinePlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"),"online").c_str();
+		cr->m_status.maxPlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"), "max").c_str();
+		wstring motdJson = GetJsonFieldFromJsonString(allRecv, "description");
+		cr->m_status.motd += GetJsonFieldFromJsonString(motdJson, "text");
+		if (cr->m_status.motd == L"\"\"") //有的时候服务器返回的text为空，这个时候取出的json文本就是两个双引号，这里的代码将双引号去除
+			cr->m_status.motd.clear();
+		if (pwin->call_function("GetMotdType", motdJson) == L"array")
 		{
-			cr->m_status.onlinePlayer += allRecv[iPos];
-			iPos++;
+			wstring motdExtra = pwin->call_function("TranslateExtraMotd", motdJson).to_string().c_str();
+			cr->m_status.motd += motdExtra;
 		}
-		pwin->call_function("DebugLog", cr->m_status.onlinePlayer);
-
-		iMaxPos = allRecv.find(L"max");
-		iPos = iMaxPos + 5;
-		pwin->call_function("DebugLog", " / ");
-		while (allRecv[iPos] != '}' && allRecv[iPos] != ',')
-		{
-			cr->m_status.maxPlayer += allRecv[iPos];
-			iPos++;
-		}
-		pwin->call_function("DebugLog", cr->m_status.maxPlayer);
-
-		pwin->call_function("DebugLog", "\n服务器标语: ");
-		iMotdPos = allRecv.find(L"text");
-		iPos = iMotdPos + 7;
-		while (allRecv[iPos] != '}' && allRecv[iPos] != '\"')
-		{
-			if ((byte(allRecv[iPos]) == 0xc2) && (byte(allRecv[iPos + 1]) == 0xa7)) //过滤掉UTF-8字符§和颜色代码
-			{
-				iPos = iPos + 3;
-				continue;
-			}
-			cr->m_status.motd += allRecv[iPos];
-			iPos++;
-		}
-		pwin->call_function("DebugLog", cr->m_status.motd);
-		pwin->call_function("DebugLog", "\n-----------------------------\n");
 	}
-	//printf_s("%s %d", WsGetErrorInfo(), WSAGetLastError());
-	pwin->call_function("DebugLog", "获取成功！\n");
 	wstring faviconBase64 = pwin->call_function("GetJsonFieldFromJsonString", allRecv.c_str(), "favicon").to_string().c_str();
 	faviconBase64 = faviconBase64.substr(1, faviconBase64.length() - 2);//去除首尾引号
 	int iBase64Begin = faviconBase64.find_first_of(',') + 1;
 	faviconBase64 = faviconBase64.substr(iBase64Begin, faviconBase64.length() - iBase64Begin + 1);//取出img中的base64部分
-	string imgData = base64_decode(WcharToChar(faviconBase64.c_str()));
+	string imgData = base64_decode(WcharToChar(faviconBase64.c_str()));//base64解码
 	FILE *fp;
-	string faviconPath = getCurrentWorkDir() + "\\ServerIcons\\" + serverAddr.c_str() + ".png";
+	string faviconPath = getCurrentWorkDir() + "\\ServerIcons\\";
+	if (_access(faviconPath.c_str(), 0) == -1)//文件夹不存在时，创建文件夹
+		_mkdir(faviconPath.c_str());
+	faviconPath = faviconPath + serverAddr.c_str() + ".png";//将img写入到文件中
 	fopen_s(&fp, faviconPath.c_str(), "wb");
 	for (int i = 0; i < imgData.length(); i++)
 	{
@@ -345,25 +393,25 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	cr->iGetFlag = cr->FSUCCESSFUL;
 	return true;
 }
+
 void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort) {
 	bool flag = true;
 	flag = GetServerInfo(cr, serverAddr, serverPort);
 	if (!flag)
 	{
+		pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
 		pwin->call_function("DebugLog", cr->GetLastStateInfo());
-		pwin->call_function("SetSerStatus", sciter::value("<div id=\"statusDot\" style=\"display:inline-block;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"padding-left:10px;display:inline-block;width:80px;\">离线</span>"));
-		pwin->call_function("SetPlayerNum", sciter::value("/ QWQ"), sciter::value(cr->GetMaxPlayer()));
-		pwin->call_function("SetMotd", sciter::value(cr->GetLastStateInfo()));
 		return;
 	}
 	if (cr->GetOnlinePlayer().length() == 0)
-		pwin->call_function("SetSerStatus", sciter::value("<div id=\"statusDot\" style=\"display:inline-block;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"padding-left:10px;display:inline-block;width:80px;\">离线</span>"));
+	{
+		pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
+	}
 	else
-		pwin->call_function("SetSerStatus", sciter::value("<div id=\"statusDot\" style=\"display:inline-block;width:10px;height:10px;border-radius:5px;background:green;\"></div><span style=\"padding-left:10px;display:inline-block;width:80px;\">在线</span>"));
-	pwin->call_function("SetPlayerNum", sciter::value(cr->GetOnlinePlayer()), sciter::value(cr->GetMaxPlayer()));
-	pwin->call_function("SetMotd", sciter::value(cr->GetMotd()));
-	pwin->call_function("SetFavicon", sciter::value(cr->GetFavicon()));
-
+	{
+		wstring playerNum = cr->GetOnlinePlayer() + L" / "+ cr->GetMaxPlayer();
+		pwin->call_function("AddServerInfo", sciter::value(cr->GetFavicon()), "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:green;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">在线</span>", sciter::value(cr->GetMotd()), playerNum);
+	}
 }
 bool CwssRecver::AsyncGet(string serverAddr, string serverPort)
 {
@@ -386,17 +434,17 @@ sciter::value frame::DoTask(sciter::value serverAddr, sciter::value serverPort)
 
 
 
-string CwssRecver::GetOnlinePlayer()
+wstring CwssRecver::GetOnlinePlayer()
 {
 	return m_status.onlinePlayer;
 }
 
-string CwssRecver::GetMaxPlayer()
+wstring CwssRecver::GetMaxPlayer()
 {
 	return m_status.maxPlayer;
 }
 
-string CwssRecver::GetMotd()
+wstring CwssRecver::GetMotd()
 {
 	return m_status.motd;
 }
