@@ -13,18 +13,23 @@
         include "scripts.tis";
     </script>
     <style>
-        #serverInfo{
+        tbody tr[state=checked]{
             context-menu: selector(menu#context);
         }
         menu > li
         {
-            color:black;
             padding:10px;
         }
         menu > li > img
         {
             width:16px;
             height:16px;
+            border-left: 1px solid #000;
+        }
+        menu > li > span
+        {
+            color:black;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -34,22 +39,22 @@
         <span id="Title">服务器状态</span>
         <hr>
     </header>
-    <section style="margin:auto auto;" #sec_appendServer>
+    <section style="width: 700px;height:30px;margin:auto auto;" #sec_appendServer>
         <input type="text" style="display:block;float:left;" id="serverAddr" value="mc.rongyaomc.com" nullable
             novalue="localhost" />
         <input type="text" style="display:block;float:left;margin-left:10px;" id="serverPort" value="25565" nullable
             novalue="25565" />
         <button class="" id="btnAppend" style="float:left;margin-left:10px;" role="default-button">添加</button>
-        <button class="" id="btnRefresh" style="float:left;margin-left:10px;" role="default-button">点我刷新</button>
+        <button class="" id="btnRefresh" style="float:left;margin-left:10px;" role="default-button">刷新</button>
     </section>
-    <section style="margin:auto auto;position:relative;top:45px;" #sec_serverInfo>
+    <section style="width:800px;height:426px;margin:auto auto;" #sec_serverInfo>
         <table #serverInfo>
             <thead>
                 <tr>
                     <th style="width: 65px;">Icons</th>
                     <th style="width:100px;">status</th>
-                    <th style="width:400px;">Motd</th>
-                    <th style="width:235px;">OnlineInfo</th>
+                    <th style="width:500px;">Motd</th>
+                    <th style="width:135px;">OnlineInfo</th>
                 </tr>
             </thead>
             <tbody></tbody>
@@ -58,15 +63,15 @@
             <!-- note class .context here, it is with purpose here 
                  master CSS has all needed definitions for menu.context -->
             <menu.context id="context">
-              <li id="menu_table_refresh"><img src="refresh.png">刷新</li>
-              <li id="menu_table_top"><img src="top.png">置顶</li>
-              <li id="menu_table_delete"><img src="delete.png">删除</li>
+                <li id="menu_table_cancelCheck"><img src="cancel.png"><span>取消选择</span></li>
+                <li id="menu_table_refresh"><img src="refresh.png"><span>刷新</span></li>
+                <li id="menu_table_top"><img src="top.png"><span>置顶</span></li>
+                <li id="menu_table_delete"><img src="delete.png"><span>删除</span></li>
             </menu>
         </popup>
     </section>
-    <p style="position:relative;top:200px;" role="default-button">刷新不要过于频繁</p>
-
-    <span style="position:absolute;bottom:0px;left:0px;width:200dip;">Version: 1.0<br/><span #EngineVer></span></span>
+    <p style="position:relative;text-align: right;font-weight: bold;right:10px;" role="default-button">刷新不要过于频繁!</p>
+    <div style="position:absolute;bottom:5px;left:10px;width:200dip;"><span #appVer>0.1.0 build-1454 α</span><br/><span #EngineVer></span></div>
 
 </body>
 

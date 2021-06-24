@@ -61,8 +61,6 @@ cserstatus {
   prototype: CSerStatus url(class.tis);
   display:inline-block;
 }
-
-
 #btnRefresh:hover {
   transform: scale(0.95,0.95); 
 }
@@ -72,12 +70,13 @@ cserstatus {
 }
 
 table {
-    //flow: table-fixed;
     width:800px;
-    height:300px;
+    height:425px;
     overflow-y:auto;
-    border:1dip solid grey;
+    border-top:1px solid darkgray;
+    background-color: rgba(211, 211, 211, 0.5);
 }
+th{text-align: center;}
 td>img{width:64px;height:64px;}
 tbody
 { 
@@ -85,9 +84,18 @@ tbody
     height:*; 
     width:*;
     padding:0; 
-    text-align:center;
 }
-tbody tr:checked { background:highlight; color:highlighttext; }
+tbody>tr>td:nth-child(1){
+  padding-left: 5px;
+  text-align: center;
+}
+tbody>tr>td:nth-child(3){
+  font-size: 16px;
+}
+tbody>tr>td:nth-child(4){
+  text-align: center;
+}
+tbody tr[state=checked] { background:rgba(211, 211, 211, 0.7); color:highlighttext; }
 /* .btn{
     background: #fff;
     border: 0.8px solid #5755d9;

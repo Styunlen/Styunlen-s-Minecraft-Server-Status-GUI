@@ -394,41 +394,68 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	return true;
 }
 
-void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort) {
+void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort, bool isRefresh = false/* 是否为刷新操作 */) {
 	bool flag = true;
 	flag = GetServerInfo(cr, serverAddr, serverPort);
-	if (!flag)
+	if(!isRefresh)
 	{
-		pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
-		pwin->call_function("DebugLog", cr->GetLastStateInfo());
-		return;
-	}
-	if (cr->GetOnlinePlayer().length() == 0)
-	{
-		pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
+		if (!flag)
+		{
+			pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
+			pwin->call_function("DebugLog", cr->GetLastStateInfo());
+			return;
+		}
+		if (cr->GetOnlinePlayer().length() == 0)
+		{
+			pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
+		}
+		else
+		{
+			wstring playerNum = cr->GetOnlinePlayer() + L" / " + cr->GetMaxPlayer();
+			pwin->call_function("AddServerInfo", sciter::value(cr->GetFavicon()), "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:green;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">在线</span>", sciter::value(cr->GetMotd()), playerNum);
+		}
 	}
 	else
 	{
-		wstring playerNum = cr->GetOnlinePlayer() + L" / "+ cr->GetMaxPlayer();
-		pwin->call_function("AddServerInfo", sciter::value(cr->GetFavicon()), "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:green;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">在线</span>", sciter::value(cr->GetMotd()), playerNum);
+		string val = serverAddr + ':' + serverPort;//完整的地址与在线人数的合并，地址用于标记要刷新的服务器状态 e.g. localhost:25565
+													//合并是因为后端只可传四个参数给前端,其实可以传多个参数，下个版本搞
+		if (!flag)
+		{
+			val += ",/QWQ/";
+			pwin->call_function("EditServerInfo", sciter::value(val), "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()));
+			pwin->call_function("DebugLog", cr->GetLastStateInfo());
+			return;
+		}
+		if (cr->GetOnlinePlayer().length() == 0)
+		{
+			val += ",/QWQ/";
+			pwin->call_function("EditServerInfo", sciter::value(val),"ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()));
+		}
+		else
+		{
+			wstring playerNum = cr->GetOnlinePlayer() + L" / " + cr->GetMaxPlayer();
+			val += ',' + WcharToChar(playerNum.c_str());
+			pwin->call_function("EditServerInfo", sciter::value(val), sciter::value(cr->GetFavicon()), "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:green;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">在线</span>", sciter::value(cr->GetMotd()));
+		}
 	}
 }
-bool CwssRecver::AsyncGet(string serverAddr, string serverPort)
+bool CwssRecver::AsyncGet(string serverAddr, string serverPort, bool isRefresh = false/* 是否为刷新操作 */)
 {
-	thread t = thread(ThFunc_AsyncGet,this, serverAddr, serverPort);
+	thread t = thread(ThFunc_AsyncGet,this, serverAddr, serverPort, isRefresh);
 	t.detach();
 	return true;
 }
 
 
 
-sciter::value frame::DoTask(sciter::value serverAddr, sciter::value serverPort)
+sciter::value frame::DoTask(sciter::value serverAddr, sciter::value serverPort, sciter::value isRefresh/* 是否为刷新操作 */)
 {
 	if (!g_cr.init())
 	{
 		pwin->call_function("DebugLog", g_cr.GetLastStateInfo());
 	}
-	g_cr.AsyncGet(WcharToChar(serverAddr.to_string().c_str()), WcharToChar(serverPort.to_string().c_str()));
+	bool bRefresh = (isRefresh.to_string() == L"F") ? false : true;
+	g_cr.AsyncGet(WcharToChar(serverAddr.to_string().c_str()), WcharToChar(serverPort.to_string().c_str()), bRefresh);
 	return sciter::value("End Task");
 }
 

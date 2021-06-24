@@ -81,6 +81,7 @@ ipch/
 *.sdf
 *.cachefile
 *.VC.db
+九仞私服状态获取.VC.VC.opendb
 
 # Visual Studio profiler
 *.psess

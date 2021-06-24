@@ -1,20 +1,24 @@
 ﻿  bg.png 358567
-  class.tis 1093 compressed to 494 (45%)
+  cancel.png 7800
+  class.tis 693 compressed to 365 (52%)
   delete.png 3328
   favicon.ico 67646 compressed to 5862 (8%)
   flat-theme.css 12093 compressed to 4517 (37%)
   flat-theme.tis 1761 compressed to 925 (52%)
   ImgErr.jpg 20802
   layout.css 110
-  main.htm 2804 compressed to 1379 (49%)
+  main.htm 3186 compressed to 1546 (48%)
   refresh.png 6520
-  scripts.tis 6294 compressed to 2740 (43%)
-  style.css 2767 compressed to 1452 (52%)
+  scripts.tis 7944 compressed to 3611 (45%)
+  style.css 2994 compressed to 1531 (51%)
   test4.3.html 1677 compressed to 922 (54%)
   test4.4.html 1699 compressed to 930 (54%)
   top.png 5942
   -----------------------------
-  compressed size 415874 bytes
-  resources not changed
+  compressed size 424754 bytes
+  main.cpp
+  正在生成代码...
+  正在跳过...(未检测到相关更改)
+  resources.cpp
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.exe
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.pdb (Full PDB)

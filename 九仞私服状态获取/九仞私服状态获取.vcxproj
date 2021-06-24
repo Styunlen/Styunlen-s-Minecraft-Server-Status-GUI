@@ -170,6 +170,7 @@
     <ClCompile Include="CwssRecver.cpp" />
     <ClCompile Include="include\sciter-win-main.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="resources.cpp" />
     <ClCompile Include="stringTools.cpp" />
   </ItemGroup>
   <ItemGroup>

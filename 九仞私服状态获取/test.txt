@@ -1,1 +1,1 @@
-{"version":{"name":"BungeeCord 1.8.x-1.16.x","protocol":736},"players":{"max":9,"online":8,"sample":[{"name":"§5§l§m---------§r§d 
+{"version":{"name":"BungeeCord 1.8.x-1.16.x","protocol":736},"players":{"max":19,"online":18,"sample":[{"name":"§5§l§m---------§r§d 

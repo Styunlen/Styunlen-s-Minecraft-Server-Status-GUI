@@ -23,9 +23,9 @@ string pack_data(string d);
 class frame : public sciter::window {
 public:
 	BEGIN_FUNCTION_MAP
-		FUNCTION_2("DoTask", DoTask);
+		FUNCTION_3("DoTask", DoTask);
 	END_FUNCTION_MAP
-	sciter::value  DoTask(sciter::value serverAddr, sciter::value serverPort);
+	sciter::value DoTask(sciter::value serverAddr, sciter::value serverPort, sciter::value isRefresh/* 是否为刷新操作 */);
 	frame() : window(SW_TITLEBAR | SW_RESIZEABLE | SW_CONTROLS | SW_MAIN | SW_ENABLE_DEBUG) {}
 };
 
@@ -36,7 +36,7 @@ class CwssRecver
 public:
 	CwssRecver();
 	~CwssRecver();
-	bool AsyncGet(string serverAddr, string serverPort);
+	bool AsyncGet(string serverAddr, string serverPort, bool isRefresh);
 	void SetFlag(int i);
 	wstring GetOnlinePlayer();
 	wstring GetMaxPlayer();
@@ -44,7 +44,7 @@ public:
 	string GetLastStateInfo();
 	string GetFavicon();
 	bool init();
-	friend void ThFunc_AsyncGet(CwssRecver *cr, string serverAddr, string serverPort);
+	friend void ThFunc_AsyncGet(CwssRecver *cr, string serverAddr, string serverPort, bool isRefresh/* 是否为刷新操作 */);
 	friend bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort);
 private:
 	struct { 

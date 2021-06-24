@@ -1,1 +1,0 @@
-{"description":{"extra":[{"color":"white","text":"   "},{"strikethrough":true,"color":"dark_gray","text":"        "},{"strikethrough":true,"color":"gray","text":" "},{"strikethrough":true,"color":"aqua","text":"[   "},{"bold":true,"color":"white","text":" 
