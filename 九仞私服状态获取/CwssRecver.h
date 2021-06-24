@@ -53,6 +53,7 @@ private:
 		wstring motd;
 		string favicon;
 	} m_status;
+	bool is_inited = false;
 	/*标志获取状态
 		FSUCCESSFUL,	一切正常
 		FRAW,			类刚初始化时的状态

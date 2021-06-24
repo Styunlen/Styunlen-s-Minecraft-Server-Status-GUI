@@ -51,21 +51,15 @@ body{
   font-size: 24px;
   box-shadow: 0px 0px 1px 3px #fff;
 }
-#btn1
-{
-  position: absolute;
-  top:100px;
-  left: 300px;
-}
 cserstatus {  
   prototype: CSerStatus url(class.tis);
   display:inline-block;
 }
-#btnRefresh:hover {
+#btnAppend:hover,#btnRefresh:hover {
   transform: scale(0.95,0.95); 
 }
 
-#btnRefresh:active {
+#btnAppend:active,#btnRefresh:active {
   transform: scale(0.90,0.90); 
 }
 
@@ -86,7 +80,8 @@ tbody
     padding:0; 
 }
 tbody>tr>td:nth-child(1){
-  padding-left: 5px;
+  position:relative;
+  left:5px;
   text-align: center;
 }
 tbody>tr>td:nth-child(3){

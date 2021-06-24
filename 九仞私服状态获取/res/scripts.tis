@@ -3,6 +3,8 @@
 注释掉的代码，为调试时激活的代码
  */
 
+include "statistics.tis";
+
 /**
 
 Global variable
@@ -83,6 +85,7 @@ self.on("complete",
     function () {
         movable();
         stdout.println("got complete");
+        GetIpJson();
         //view.DoTask($(#serverAddr).value,$(#serverPort).value);
         //self.timer(5s, ::CheckGetState());
         $(#EngineVer).text = String.printf("Sciter: %d.%d.%d.%d.%s",

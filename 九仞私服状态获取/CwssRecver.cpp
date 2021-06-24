@@ -139,7 +139,10 @@ CwssRecver::CwssRecver()
 
 CwssRecver::~CwssRecver()
 {
-	WSACleanup();
+	if (is_inited)
+	{
+		WSACleanup();
+	}
 }
 
 void CwssRecver::SetFlag(int i)
@@ -306,8 +309,8 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	iResult = recv(ClientSocket, (char*)recvbuf, 1024, 0);
 	while (iResult > 0)
 	{
-		string logstr = "接收成功！";
-		logstr += iResult;
+		string logstr = "接收成功！ iResult";
+		logstr += to_string(iResult);
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
 		for (int i = 0; i < iResult; i++)
@@ -360,8 +363,18 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		cr->m_status.maxPlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"), "max").c_str();
 		wstring motdJson = GetJsonFieldFromJsonString(allRecv, "description");
 		cr->m_status.motd += GetJsonFieldFromJsonString(motdJson, "text");
-		if (cr->m_status.motd == L"\"\"") //有的时候服务器返回的text为空，这个时候取出的json文本就是两个双引号，这里的代码将双引号去除
+		if(cr->m_status.motd == L"Can't find this field") //有的服务器没有text字段，而用translate字段代替，这里取出translate字段
+		{
 			cr->m_status.motd.clear();
+			cr->m_status.motd += GetJsonFieldFromJsonString(motdJson, "translate");
+			cr->m_status.motd = cr->m_status.motd.substr(1, cr->m_status.motd.length() - 2);//去除首尾引号
+		}
+		else
+		{
+			cr->m_status.motd = (cr->m_status.motd == L"\"\"")? L"": cr->m_status.motd.substr(1, cr->m_status.motd.length() - 2);
+			//如果text为"",则直接清空，否则去除首尾引号
+			
+		}
 		if (pwin->call_function("GetMotdType", motdJson) == L"array")
 		{
 			wstring motdExtra = pwin->call_function("TranslateExtraMotd", motdJson).to_string().c_str();
@@ -372,6 +385,12 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	faviconBase64 = faviconBase64.substr(1, faviconBase64.length() - 2);//去除首尾引号
 	int iBase64Begin = faviconBase64.find_first_of(',') + 1;
 	faviconBase64 = faviconBase64.substr(iBase64Begin, faviconBase64.length() - iBase64Begin + 1);//取出img中的base64部分
+	iBase64Begin = faviconBase64.find(L"\\n");
+	while(iBase64Begin != faviconBase64.npos)//有的服务器真的奇葩，返回的favicon中包含换行符，此处代码用于去除换行符
+	{
+		faviconBase64.replace(iBase64Begin, 2, L"");
+		iBase64Begin = faviconBase64.find(L"\\n");
+	}
 	string imgData = base64_decode(WcharToChar(faviconBase64.c_str()));//base64解码
 	FILE *fp;
 	string faviconPath = getCurrentWorkDir() + "\\ServerIcons\\";
@@ -519,18 +538,22 @@ string CwssRecver::GetLastStateInfo()
 
 bool CwssRecver::init()
 {
-	WSADATA wsaData;
-	int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);//用于检测函数状态
-	if (iResult != 0) {
-		string logstr = "套接字库初始化失败 : ";
-		logstr += iResult;
-		logstr += " \n";
-		pwin->call_function("DebugLog", logstr);
-		iGetFlag = FINITFAILED;
-		return false;
+	if (!is_inited)//避免重复初始化
+	{
+		WSADATA wsaData;
+		int iResult = WSAStartup(MAKEWORD(2, 2), &wsaData);//用于检测函数状态
+		if (iResult != 0) {
+			string logstr = "套接字库初始化失败 : ";
+			logstr += iResult;
+			logstr += " \n";
+			pwin->call_function("DebugLog", logstr);
+			iGetFlag = FINITFAILED;
+			return false;
+		}
+		ZeroMemory(&m_status, sizeof(m_status));
+		iGetFlag = FSUCCESSFUL;
+		pwin->call_function("DebugLog", "已初始化套接字库\n");
+		return true;
 	}
-	ZeroMemory(&m_status, sizeof(m_status));
-	iGetFlag = FSUCCESSFUL;
-	pwin->call_function("DebugLog", "已初始化套接字库\n");
 	return true;
 }

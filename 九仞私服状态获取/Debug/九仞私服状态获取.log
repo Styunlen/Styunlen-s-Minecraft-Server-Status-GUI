@@ -7,18 +7,20 @@
   flat-theme.tis 1761 compressed to 925 (52%)
   ImgErr.jpg 20802
   layout.css 110
-  main.htm 3186 compressed to 1546 (48%)
+  main.htm 3155 compressed to 1529 (48%)
   refresh.png 6520
-  scripts.tis 7944 compressed to 3611 (45%)
-  style.css 2994 compressed to 1531 (51%)
+  scripts.tis 7995 compressed to 3647 (45%)
+  statistics.tis 558 compressed to 413 (74%)
+  style.css 2976 compressed to 1527 (51%)
   test4.3.html 1677 compressed to 922 (54%)
   test4.4.html 1699 compressed to 930 (54%)
   top.png 5942
+  update.tis 59
   -----------------------------
-  compressed size 424754 bytes
-  main.cpp
-  正在生成代码...
-  正在跳过...(未检测到相关更改)
-  resources.cpp
+  compressed size 425457 bytes
+  resources not changed
+  CwssRecver.cpp
+g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\cwssrecver.cpp(343): warning C4018: “<”: 有符号/无符号不匹配
+g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\cwssrecver.cpp(398): warning C4018: “<”: 有符号/无符号不匹配
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.exe
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.pdb (Full PDB)

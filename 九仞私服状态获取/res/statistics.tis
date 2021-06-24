@@ -1,0 +1,28 @@
+/*
+此文档为统计脚本，用于统计使用数据
+*/
+
+var ipJson={ip:"NULL"};
+
+function SetIpJson(data,status)
+{
+    ipJson = JSON.parse(data.toString());
+    stdout.printf("%v\r\n",ipJson);
+    GetIp();
+}
+
+function GetIpJson()
+{
+    var ipurl = "http://whois.pconline.com.cn/ipJson.jsp?json=true";
+    var params = {type:#get, url:ipurl, output:#string, success:SetIpJson};
+    view.request(params);
+    stdout.printf("%v\r\n",params);
+}
+
+function GetIp()
+{
+    if(ipJson.ip != "NULL")
+    {
+        return ipJson.ip;
+    }
+}

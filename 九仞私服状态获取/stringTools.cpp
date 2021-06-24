@@ -39,7 +39,7 @@ std::string UnicodeToANSI(const std::wstring & wstr)
 		std::unique_ptr< char[] > buff(new char[len + 1]);
 		wcsrtombs_s(&len, buff.get(), len+1,&src, len, &state);
 		if (errno == EILSEQ)
-			cout << "233" << endl;
+			cout << "233" << endl;//debug´úÂë
 		if (static_cast<size_t>(-1) != len) {
 			ret.assign(buff.get(), len);
 		}
