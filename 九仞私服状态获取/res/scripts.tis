@@ -4,6 +4,7 @@
  */
 
 include "statistics.tis";
+include "update.tis";
 
 /**
 
@@ -25,6 +26,10 @@ Window's event
 前端窗口事件区
 
 **/
+event click $(a[href]) {
+    Sciter.launch(this.attributes["href"]);
+    return true;
+}
 
 event click $(#menu_table_cancelCheck)
 {
@@ -85,12 +90,14 @@ self.on("complete",
     function () {
         movable();
         stdout.println("got complete");
-        GetIpJson();
         //view.DoTask($(#serverAddr).value,$(#serverPort).value);
         //self.timer(5s, ::CheckGetState());
         $(#EngineVer).text = String.printf("Sciter: %d.%d.%d.%d.%s",
             (Sciter.VERSION >> 16) & 0xffff, Sciter.VERSION & 0xffff,
             (Sciter.REVISION >> 16) & 0xffff, Sciter.REVISION & 0xffff, Sciter.BUILD.toString());
+        GetIpJson();
+        CountUsageTimes();
+        CheckUpdate();
     });
 
 /**

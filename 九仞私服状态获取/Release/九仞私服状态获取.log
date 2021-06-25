@@ -5,16 +5,25 @@
   favicon.ico 67646 compressed to 5862 (8%)
   flat-theme.css 12093 compressed to 4517 (37%)
   flat-theme.tis 1761 compressed to 925 (52%)
+  http.tis 1170 compressed to 617 (52%)
   ImgErr.jpg 20802
   layout.css 110
-  main.htm 2965 compressed to 1457 (49%)
+  main.htm 5416 compressed to 2650 (48%)
   refresh.png 6520
-  scripts.tis 7647 compressed to 3445 (45%)
-  style.css 2994 compressed to 1534 (51%)
+  scripts.tis 8138 compressed to 3711 (45%)
+  statistics.tis 917 compressed to 545 (59%)
+  style.css 2934 compressed to 1505 (51%)
   test4.3.html 1677 compressed to 922 (54%)
   test4.4.html 1699 compressed to 930 (54%)
   top.png 5942
+  update.tis 1646 compressed to 1017 (61%)
   -----------------------------
-  compressed size 424502 bytes
+  compressed size 428411 bytes
   resources.cpp
-LINK : fatal error LNK1104: 无法打开文件“G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Release\九仞私服状态获取.exe”
+  正在生成代码
+  0 of 730 functions ( 0.0%) were compiled, the rest were copied from previous compilation.
+    0 functions were new in current compilation
+    11 functions had inline decision re-evaluated but remain unchanged
+  已完成代码的生成
+  九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Release\九仞私服状态获取.exe
+  九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Release\九仞私服状态获取.pdb (Full PDB)

@@ -7,16 +7,23 @@ var ipJson={ip:"NULL"};
 function SetIpJson(data,status)
 {
     ipJson = JSON.parse(data.toString());
-    stdout.printf("%v\r\n",ipJson);
-    GetIp();
+    stdout.printf("%v\r\nIP:%s\r\n",ipJson,GetIp());
+    
 }
 
 function GetIpJson()
 {
-    var ipurl = "http://whois.pconline.com.cn/ipJson.jsp?json=true";
-    var params = {type:#get, url:ipurl, output:#string, success:SetIpJson};
-    view.request(params);
-    stdout.printf("%v\r\n",params);
+    if(ipJson.ip == "NULL")
+    {
+        var ipurl = "http://whois.pconline.com.cn/ipJson.jsp?json=true";
+        var params = {type:#get, url:ipurl, output:#string, success:SetIpJson};
+        view.request(params);
+        //stdout.printf("%v\r\n",params);
+        return ipJson;
+    }
+    else{
+        return ipJson;
+    }
 }
 
 function GetIp()
@@ -25,4 +32,10 @@ function GetIp()
     {
         return ipJson.ip;
     }
+}
+function CountUsageTimes() {
+    var ipurl = "http://client.styunlen.cn:55555/";
+    var userInfo = GetIpJson();
+    var params = {type:#get, params: userInfo, url:ipurl, output:#string};
+    view.request(params);
 }

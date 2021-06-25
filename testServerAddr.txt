@@ -3,3 +3,4 @@ thy.xyfcm.top		25565
 mc.yihaifenglan.com	25565
 1.mcyyy.com		25565
 mc17.starmc.cn		30080
+mc.iecraft.com		25565

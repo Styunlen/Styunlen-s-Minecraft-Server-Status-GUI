@@ -1,3 +1,64 @@
 /*
 此文档为更新脚本，用于程序自动更新
 */
+include "http.tis";
+
+// $(button#download) << event click() {
+      
+//         var out = $(code#out);
+//         var progress = $(progress#downloading);
+        
+//         function onprogress(loaded, total) 
+//         {
+//           progress.value = loaded;
+//           out.text = String.printf("received %d bytes from %d",loaded, total || 0);
+//         }
+//         function onsuccess(md5) {
+//           progress.attributes["hidden"] = true;
+//           if(md5)
+//             out.text = String.printf("done");
+//           else
+//             out.text = "error writing file";
+//         }
+//         function onerror(err) {
+//           out.text = String.printf("failure:%s", err.toString());
+//         }
+        
+//         progress.attributes["hidden"] = undefined; // show the progress bar
+        
+//         http.download(
+//             "https://terrainformatica.com/photos/last-diligence.jpg",
+//             self.url("photo.jpg"),
+//             onsuccess, onerror, onprogress );
+      
+//       };
+
+var updateJson="NULL";
+var appVer = "v0.1"; //release tag name
+function CheckUpdate()
+{
+    function SetUpdateJson(data,status)
+    {
+        updateJson = JSON.parse(data.toString());
+        CheckUpdate();
+    }
+    function SetErr(err, status)
+    {
+        $(#updateDescription).text = String.printf("异常: %s,状态: %d", err.toString(), status);
+    }
+    if(updateJson == "NULL")
+    {
+        var ipurl = "https://api.github.com/repos/Styunlen/Styunlen-s-Minecraft-Server-Status-GUI/releases";
+        var params = {type:#get, url:ipurl, output:#string, success:SetUpdateJson, error: SetErr};
+        view.request(params);
+    }else
+    {
+        if(updateJson[0].tag_name != appVer)
+        {
+            $(#updateDescription).text = String.printf("新版本{ %s }发布啦！", updateJson[0].tag_name);
+        }
+        else{
+            $(#updateDescription).text = String.printf("{ %s }已是最新版本！", appver);
+        }
+    }
+}
