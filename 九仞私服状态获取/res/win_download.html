@@ -1,0 +1,236 @@
+﻿<!DOCTYPE html>
+<html window-frame="transparent">
+
+<head>
+    <meta charset="UTF-8" />
+    <style>
+        html {
+            font: system;
+            background-color: transparent;
+            overflow: visible;
+        }
+
+        body {
+            overflow: visible;
+            flow: "1 2"
+                "3 3";
+        }
+
+        #header {
+            width: 400dip;
+            line-height: 1.6em;
+            background: window-accent-color;
+            flow: horizontal;
+        }
+
+        #header>caption {
+            width: 364;
+            vertical-align: middle;
+        }
+
+        button.window {
+            display: block;
+            size: 36dip;
+            margin: 0;
+            padding: 0;
+            background: 50% 50% no-repeat;
+            background-size: 36dip;
+            position: relative;
+            right: 5px;
+        }
+
+        button.window#close {
+            background-image: url("icon-close.png");
+        }
+
+        button.window#close:hover {
+            transform: scale(0.95, 0.95);
+        }
+
+        button.window#close:active {
+            transform: scale(0.9, 0.9);
+        }
+
+        #main {
+            width: 400dip;
+            height: 600dip;
+            vertical-align: middle;
+            background: white;
+            z-index: 6;
+            font-size: 1.6em;
+        }
+
+        #content {
+            width: 300dip;
+            height: 500dip;
+            margin: auto auto;
+        }
+
+        #content>p {
+            text-align: center;
+        }
+        #downloadBrief{font-size: 1em;overflow-y: auto;height:200dip;}
+        #downloadProgress {
+            text-align: center;
+        }
+
+        progress {
+            vertical-align: middle;
+        }
+
+        progress#proBar {
+            height: 18dip;
+            width: 200dip;
+        }
+
+        body {
+            flow: vertical;
+            padding: 0;
+            margin: 0;
+            transform: scale(0);
+        }
+
+        body.shown {
+            transform: scale(1);
+            transition: transform(liner, 600ms);
+            visibility: visible;
+        }
+
+        body.hidden {
+            transform: scale(0);
+            transition: transform(linear, 600ms);
+            visibility: hidden;
+        }
+
+        #copyright {
+            display: block;
+            position: absolute;
+            bottom: 5dip;
+            margin: auto auto;
+            font-weight: bold;
+        }
+
+        #jumpTo {
+            display: block;
+            position: absolute;
+            bottom: 30dip;
+            margin: auto auto;
+            font-weight: bold;
+        }
+    </style>
+
+    <script type="text/tiscript">
+        include "http.tis";
+        const body = $(body);
+        var hostview = view.parameters.hostview;
+        var appDownloadUrl = view.parameters.downloadUrl;
+        var appDownloadCount = view.parameters.downloadCount;
+        var appUpdateTime = view.parameters.updateTime;
+        var appVer = view.parameters.downloadVer;
+        var appBrief = view.parameters.downloadBrief;
+        var dnProgress = 0;
+
+        event click $(#retry)
+        {
+            $(p#out).html = "连接资源中";
+            Download();
+        }
+        function Download()
+        {
+            var progress = $(#proBar);
+            progress.timer(20,function(){
+                    if( progress.value >= 1000 || dnProgress < 0) return;
+                    progress.value = dnProgress; 
+                    stdout.println(progress.value.toString());
+                    return true;
+            });
+            var out = $(p#out);
+            function onprogress(loaded, total) 
+            {
+                try{
+                    dnProgress = (loaded/(total) * 1000).toInteger();
+                    out.html = String.printf("已下载 %s(%d%%) 共 %s",loaded, (loaded/(total)) * 100, total);                   
+                }
+                catch(ex)
+                {
+                    stdout.println(ex.message + ex.stackTrace);
+                }
+            }
+            function onsuccess(md5) {
+                if(md5)
+                {
+                    dnProgress = 1000;
+                    out.html = String.printf("下载完毕");
+                    System.exec("C:\\Windows\\explorer.exe",hostview.getCurrentWorkDir().toString());
+                }
+                else
+                {
+                    dnProgress = -1;
+                    out.html = "下载失败";
+                }
+            }
+            function onerror(err) {
+                dnProgress = -1;
+                out.html = String.printf("异常: <a href=\"https://docs.microsoft.com/zh-CN/windows/win32/wininet/wininet-errors\">%s</a> 重试<img #retry style=\"position:relative;left:10px;top:2px;width:16px;height:16px;\" src=\"retry.png\">", err.toString());
+            }
+            var params = {app:"mcServerInfoChecker"};
+            var headers = {
+                User-Agent: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.114 Safari/537.36 Edg/91.0.864.59",
+                Accept: "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+                Accept-Language: "zh-CN,zh;q=0.9,en;q=0.8,en-GB;q=0.7,en-US;q=0.6"
+            };
+            http.download(
+                appDownloadUrl,
+                String.printf("%s\\%s.zip", hostview.getCurrentWorkDir(), appVer),
+                onsuccess, onerror, onprogress,params,headers);
+        }
+        function self.ready()
+        {
+            view.windowIcon = "./favicon.ico";
+            appDownloadUrl = appDownloadUrl.replace("github.com","hub.fastgit.org");//使用Github镜像下载
+            $(#appVer).text = appVer;
+            $(#updateTime).text = "更新时间：" + appUpdateTime.toString();
+            $(#downloadCount).text = "该版本已累计下载 " + appDownloadCount + " 次";
+            $(#downloadBrief).html = appBrief;
+            $(#jumpTo).attributes["href"] = appDownloadUrl;
+            stdout.println("url: ",appDownloadUrl);
+            Download();
+            body.timer(1, ::this.attributes.addClass("shown"));
+        }   
+        function onWinDownloadClosing{
+            view.close("下载窗口关闭");
+        }
+        view.on("closing", onWinDownloadClosing);
+        event click $(a[href]) {
+            stdout.printf("link (%s) clicked\n",this.attributes["href"]);
+            Sciter.launch(this.attributes["href"]);
+            return true;
+        }
+    </script>
+</head>
+
+<body>
+    <section #header>
+        <caption style="padding-left:2dip;font-weight: bold;font-size: 16dip;" role="window-caption">正在下载</caption>
+        <button.window role="window-close" #close></button>
+    </section>
+    <section #main>
+        <div #content>
+            <p #appVer></p>
+            <p #updateTime></p>
+            <p #downloadCount></p>
+            <div>
+                <center><p>版本更新内容</p></center>
+                <p #downloadBrief></p>
+            </div>
+            <div #downloadProgress>
+                <progress #proBar max="1000" value="0" />
+                <p #out>连接资源中</p>
+            </div>
+        </div>
+        <a #jumpTo href="">跳转到浏览器下载</a>
+        <p #copyright>Copyright(c) 2021 九仞 版权所有</p>
+    </section>
+</body>
+
+</html>

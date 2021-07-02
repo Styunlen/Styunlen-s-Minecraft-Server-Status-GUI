@@ -134,6 +134,7 @@ string pack_data(string d)
 
 CwssRecver::CwssRecver()
 {
+	is_getting = CreateMutex(NULL, FALSE, NULL);
 }
 
 
@@ -143,7 +144,8 @@ CwssRecver::~CwssRecver()
 	{
 		WSACleanup();
 	}
-}
+	CloseHandle(is_getting);
+}	
 
 void CwssRecver::SetFlag(int i)
 {
@@ -164,6 +166,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
 		cr->iGetFlag = cr->FGHFAILED;
+		cr->m_errorMsg = logstr;
 		return false;
 	}
 	if (result == nullptr)
@@ -173,6 +176,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
 		cr->iGetFlag = cr->FGHFAILED;
+		cr->m_errorMsg = logstr;
 		return false;
 	}
 	SOCKET ClientSocket = INVALID_SOCKET;
@@ -185,6 +189,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 			string logstr = "已遍历域名下的所有解析，连接失败";
 			logstr += " \n";
 			pwin->call_function("DebugLog", logstr);
+			cr->m_errorMsg = logstr;
 			return false;
 		}
 		ClientSocket = socket(pres->ai_family, pres->ai_socktype, pres->ai_protocol);
@@ -195,6 +200,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 			pwin->call_function("DebugLog", logstr);
 			freeaddrinfo(result);
 			cr->iGetFlag = cr->FCSFAILED;
+			cr->m_errorMsg = logstr;
 			return false;
 		}
 
@@ -253,6 +259,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		pwin->call_function("DebugLog", logstr);
 		closesocket(ClientSocket);
 		cr->iGetFlag = cr->FSENDFAILED;
+		cr->m_errorMsg = logstr;
 		return false;
 	}
 	else
@@ -278,6 +285,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		pwin->call_function("DebugLog", logstr);
 		closesocket(ClientSocket);
 		cr->iGetFlag = cr->FSENDFAILED;
+		cr->m_errorMsg = logstr;
 		return false;
 	}
 	else
@@ -293,15 +301,14 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	byte* temp = new byte[1024 * 64];
 	unsigned int tempIndex = 0;
 #endif
-	wstring allRecv;
-	string ascAllRecv;
+	string ascAllRecv; //用于接收字符串
+	wstring allRecv; //用于保存转码后的字符串
 	iResult = 1;
 	//Server返回的数据包中会包含数据包长度前缀，这段代码表示去除前缀，直到遇到json文本开头的{
 	for (int i = 0; iResult > 0 && recvbuf[0] != '{'; i++)
 	{
 		iResult = recv(ClientSocket, (char*)recvbuf, 1, 0);
 	}
-	allRecv += recvbuf[0]; //将json开头的括号加回
 	ascAllRecv += recvbuf[0];
 #ifdef  _DEBUG
 	temp[tempIndex++] = recvbuf[0];
@@ -315,7 +322,6 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		pwin->call_function("DebugLog", logstr);
 		for (int i = 0; i < iResult; i++)
 		{
-			allRecv += recvbuf[i];
 			ascAllRecv += recvbuf[i];
 #ifdef  _DEBUG
 			temp[tempIndex] = recvbuf[i];
@@ -333,6 +339,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		pwin->call_function("DebugLog", logstr);
 		closesocket(ClientSocket);
 		cr->iGetFlag = cr->FRECVFAILED;
+		cr->m_errorMsg = logstr;
 		return false;
 	}
 #ifdef  _DEBUG
@@ -343,7 +350,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 			_mkdir(faviconPath.c_str());
 		faviconPath = faviconPath + serverAddr.c_str() + ".txt";//将img写入到文件中
 		fopen_s(&fp, faviconPath.c_str(), "wb");
-		for (int i = 0; i < tempIndex; i++)
+		for (unsigned int i = 0; i < tempIndex; i++)
 		{
 			fprintf_s(fp, "%c", temp[i]);
 		}
@@ -357,7 +364,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 #ifdef  _DEBUG
 	delete[] temp;
 #endif
-	if ((allRecv.length() != 0) && (allRecv.find(L"online") != allRecv.npos))
+	if ((allRecv.length() != 0) && (allRecv.find(L"online") != allRecv.npos))//获取服务器信息
 	{
 		cr->m_status.onlinePlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"),"online").c_str();
 		cr->m_status.maxPlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"), "max").c_str();
@@ -398,7 +405,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		_mkdir(faviconPath.c_str());
 	faviconPath = faviconPath + serverAddr.c_str() + ".png";//将img写入到文件中
 	fopen_s(&fp, faviconPath.c_str(), "wb");
-	for (int i = 0; i < imgData.length(); i++)
+	for (unsigned int i = 0; i < imgData.length(); i++)
 	{
 		fprintf_s(fp, "%c", imgData[i]);
 	}
@@ -414,19 +421,27 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 }
 
 void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort, bool isRefresh = false/* 是否为刷新操作 */) {
+	WaitForSingleObject(cr->is_getting, INFINITE); //解决多个线程同时获取服务器信息时显示错乱的问题
 	bool flag = true;
-	flag = GetServerInfo(cr, serverAddr, serverPort);
+	cr->StatusClear();//清空上一次获取的信息
+	flag = GetServerInfo(cr, serverAddr, serverPort);//获取信息
 	if(!isRefresh)
 	{
 		if (!flag)
 		{
-			pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
+			string motdTemp = serverAddr + ":" + serverPort;
+			motdTemp += " 服务器信息获取异常 ";
+			motdTemp += cr->GetLastStateInfo();
+			pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(motdTemp), sciter::value("/ QWQ/"));
 			pwin->call_function("DebugLog", cr->GetLastStateInfo());
 			return;
 		}
 		if (cr->GetOnlinePlayer().length() == 0)
 		{
-			pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()), sciter::value("/ QWQ/"));
+			string motdTemp = serverAddr + ":" + serverPort;
+			motdTemp += " 服务器信息不完整 ";
+			motdTemp += cr->GetLastStateInfo();
+			pwin->call_function("AddServerInfo", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(motdTemp), sciter::value("/ QWQ/"));
 		}
 		else
 		{
@@ -440,15 +455,20 @@ void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort, bool is
 													//合并是因为后端只可传四个参数给前端,其实可以传多个参数，下个版本搞
 		if (!flag)
 		{
+			string motdTemp = val;
+			motdTemp += " 服务器信息获取异常 ";
+			motdTemp += cr->GetLastStateInfo();
 			val += ",/QWQ/";
-			pwin->call_function("EditServerInfo", sciter::value(val), "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()));
+			pwin->call_function("EditServerInfo", sciter::value(val), "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(motdTemp));
 			pwin->call_function("DebugLog", cr->GetLastStateInfo());
 			return;
 		}
 		if (cr->GetOnlinePlayer().length() == 0)
 		{
-			val += ",/QWQ/";
-			pwin->call_function("EditServerInfo", sciter::value(val),"ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(cr->GetLastStateInfo()));
+			string motdTemp = val;
+			val += ",/QWQ/";	
+			motdTemp += " 服务器信息不完整 ";
+			pwin->call_function("EditServerInfo", sciter::value(val),"ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:red;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">离线</span>", sciter::value(motdTemp));
 		}
 		else
 		{
@@ -457,6 +477,7 @@ void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort, bool is
 			pwin->call_function("EditServerInfo", sciter::value(val), sciter::value(cr->GetFavicon()), "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:green;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">在线</span>", sciter::value(cr->GetMotd()));
 		}
 	}
+	ReleaseMutex(cr->is_getting);
 }
 bool CwssRecver::AsyncGet(string serverAddr, string serverPort, bool isRefresh = false/* 是否为刷新操作 */)
 {
@@ -476,6 +497,31 @@ sciter::value frame::DoTask(sciter::value serverAddr, sciter::value serverPort, 
 	bool bRefresh = (isRefresh.to_string() == L"F") ? false : true;
 	g_cr.AsyncGet(WcharToChar(serverAddr.to_string().c_str()), WcharToChar(serverPort.to_string().c_str()), bRefresh);
 	return sciter::value("End Task");
+}
+
+sciter::value frame::SaveServerList(sciter::value json)
+{
+	FILE* fp;
+	string jsonPath = getCurrentWorkDir() + "\\serverList.json";
+	fopen_s(&fp, jsonPath.c_str(), "wb");
+	fprintf_s(fp, "%ws", json.to_string().c_str());
+	fclose(fp);
+	return sciter::value();
+}
+
+sciter::value frame::GetServerList()
+{
+	string jsonPath = getCurrentWorkDir() + "\\serverList.json";
+	if (_access(jsonPath.c_str(), 0) == -1)
+	{
+		return sciter::value("NULL");
+	}
+	FILE* fp;
+	fopen_s(&fp, jsonPath.c_str(), "rb");
+	char json[1024*8];
+	fscanf_s(fp, "%s", json,1024*8);
+	fclose(fp);
+	return sciter::value(json);
 }
 
 
@@ -498,6 +544,14 @@ wstring CwssRecver::GetMotd()
 string CwssRecver::GetFavicon()
 {
 	return m_status.favicon;;
+}
+
+void CwssRecver::StatusClear()
+{
+	m_status.favicon.clear();
+	m_status.maxPlayer.clear();
+	m_status.motd.clear();
+	m_status.onlinePlayer.clear();
 }
 
 string CwssRecver::GetLastStateInfo()
@@ -533,6 +587,8 @@ string CwssRecver::GetLastStateInfo()
 		info = "QWQ，我被一个状态判断给难倒了";
 		break;
 	}
+	info += " 详细信息:" + m_errorMsg;
+	m_errorMsg.clear();
 	return info;
 }
 
@@ -548,11 +604,13 @@ bool CwssRecver::init()
 			logstr += " \n";
 			pwin->call_function("DebugLog", logstr);
 			iGetFlag = FINITFAILED;
+			m_errorMsg = logstr;
 			return false;
 		}
 		ZeroMemory(&m_status, sizeof(m_status));
 		iGetFlag = FSUCCESSFUL;
 		pwin->call_function("DebugLog", "已初始化套接字库\n");
+		is_inited = true;
 		return true;
 	}
 	return true;

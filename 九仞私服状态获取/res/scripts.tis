@@ -15,7 +15,7 @@ Global variable
 var serverInfo = {
     serverAddr:"localhost",
     serverPort: "25565"
-}
+};//缓存添加到列表的服务器地址信息
 
 var serverSelected = "";
 var isRefresh=false;
@@ -38,9 +38,12 @@ event click $(#menu_table_cancelCheck)
 
 event click $(#menu_table_refresh)
 {
-    var addr = $(tr[state='checked']).attributes["value"].split(":");
+    var addr = $(tr[state='checked']).attributes["value"];
+    EditServerInfo(addr + ",/233/", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:gray;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:60px;\">获取中</span>", addr);
+    addr = addr.split(":");
     stdout.printf("%v\r\n",addr);
     view.DoTask(addr[0], addr[1], "T");
+    CountUsageTimes("Refresh");
 }
 
 event click $(#serverInfo>tbody>tr)
@@ -61,18 +64,43 @@ event click $(#menu_table_delete)
     {
         var nodeToDel = self.$(tr[state='checked']);
         nodeToDel.remove();
+        // var arrToDel = Object.create(serverInfo);
+        // arrToDel.serverAddr = serverSelected.split(":")[0];
+        // arrToDel.serverPort = serverSelected.split(":")[1];
+        // //DebugLog(String.printf("%v",arrToDel));
+        // //DebugLog(String.printf("%v",serverList));
+        // serverList.removeByValue(arrToDel);
+        SaveServerList();
+        //DebugLog(String.printf("%v",serverList));
         serverSelected = "";
     }
 }
 
 event click $(#btnRefresh){
-    view.DoTask($(#serverAddr).value, $(#serverPort).value, "T");
+    for(var item in self.$$(tbody>tr))
+    {
+        var addr = item.attributes["value"];
+        EditServerInfo(addr + ",/233/", "ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:gray;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:60px;\">获取中</span>", addr);
+        addr = addr.split(":");
+        stdout.printf("%v\r\n",addr);
+        view.DoTask(addr[0], addr[1], "T");
+    }
+    CountUsageTimes("Refresh");
 }
 
 event click $(#btnAppend){
     serverInfo.serverAddr = $(#serverAddr).value;
     serverInfo.serverPort = $(#serverPort).value;
-    view.DoTask($(#serverAddr).value, $(#serverPort).value, "F");
+    if(ServerExist(serverInfo.serverAddr,serverInfo.serverPort))
+    {
+        view.msgbox(#information,"服务器已存在！", "提示");
+        stdout.printf("%s %s\r\n",serverInfo.serverAddr,serverInfo.serverPort);
+        return false;
+    }
+    AddServerInfo("ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:gray;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:60px;\">获取中</span>", serverInfo.serverAddr + ":" + serverInfo.serverPort, "/233/");
+    view.DoTask($(#serverAddr).value, $(#serverPort).value, "T");
+    CountUsageTimes();
+    SaveServerList();
 }
 //var StatusHasChanged = false;
 function self.ready() {
@@ -85,7 +113,19 @@ function self.ready() {
     view.windowResizable = false;
     view.move(sx + (sw - w) / 2, sy + (sh - h) / 2, w, h);//移动居中
 }
-
+function SaveServerList() {
+    var ret = new Array();
+    for(var item in self.$$(tbody>tr))
+    {
+        var addr = item.attributes["value"];
+        addr = addr.split(":");
+        stdout.printf("addr:%v\r\n",addr);
+        var tempObj = {serverAddr:addr[0],serverPort:addr[1]};
+        ret.push(tempObj);
+    }
+    stdout.printf("SaveList:%v\r\n",ret);
+    view.SaveServerList(JSON.stringify(ret));
+}
 self.on("complete",
     function () {
         movable();
@@ -96,8 +136,19 @@ self.on("complete",
             (Sciter.VERSION >> 16) & 0xffff, Sciter.VERSION & 0xffff,
             (Sciter.REVISION >> 16) & 0xffff, Sciter.REVISION & 0xffff, Sciter.BUILD.toString());
         GetIpJson();
-        CountUsageTimes();
         CheckUpdate();
+        stdout.println("Current WorkDir: ", view.getCurrentWorkDir());
+        if(view.GetServerList().toString()!="NULL")
+        {
+            var serverListJson = JSON.parse(view.GetServerList().toString());
+            for(var item in serverListJson)
+            {
+                serverInfo.serverAddr = item.serverAddr;
+                serverInfo.serverPort = item.serverPort;
+                AddServerInfo("ImgErr.jpg", "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:gray;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:60px;\">获取中</span>", item.serverAddr + ":" + item.serverPort, "/233/");
+                view.DoTask(item.serverAddr,item.serverPort,"T");
+            }
+        }
     });
 
 /**
@@ -190,7 +241,7 @@ function AddServerInfo(favicon, status, motd, online) {
     var el = Element.create([tr: { value: trValue, role: "option" , state: "unchecked"}]);
     $(tbody).append(el);
     el.$append(<td><img src="{favicon}" /></td>);
-    el.$append(<td>{status}</td>);
+    el.$append(<td></td>).html = String.printf("<p>%s</p>", status);
     el.$append(<td></td>).html = String.printf("<p>%s</p>", motd);
     el.$append(<td>{online}</td>);
 }
@@ -199,12 +250,29 @@ function EditServerInfo(val, favicon, status, motd) {
     var online = val.toString().split(",")[1];
     val = val.toString().split(",")[0];
     var el = self.$(tr[value='{val}']);
-    stdout.printf("%v %s %s %s %s\r\n", el, favicon, status, motd, online);
-    stdout.printf("%s %s %s %s\r\n", el[0], el[1], el[2], el[3]);
-    el[0].html = String.printf("<img src=\"%s\" />", favicon);
-    el[1].html = status.toString();
-    el[2].html = motd.toString();
-    el[3].text = online.toString();
+    if(el!=#undefined)
+    {
+        stdout.printf("%v %s %s %s %s\r\n", el, favicon, status, motd, online);
+        stdout.printf("%s %s %s %s\r\n", el[0], el[1], el[2], el[3]);
+        el[0].html = String.printf("<img src=\"%s\" />", favicon);
+        el[1].html = status.toString();
+        el[2].html = motd.toString();
+        el[3].text = online.toString();  
+    }
+}
+
+function ServerExist(addr,port)
+{
+    for(var item in self.$$(tbody>tr))
+    {
+        var str = addr + ":" + port;
+        if(item.attributes["value"].toString() == str)
+        {
+            return true;
+        }
+    }
+    return false;
+
 }
 
 function movable() // install movable window handler

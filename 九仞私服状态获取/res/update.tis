@@ -1,40 +1,27 @@
 /*
 此文档为更新脚本，用于程序自动更新
 */
-include "http.tis";
+/**
 
-// $(button#download) << event click() {
-      
-//         var out = $(code#out);
-//         var progress = $(progress#downloading);
-        
-//         function onprogress(loaded, total) 
-//         {
-//           progress.value = loaded;
-//           out.text = String.printf("received %d bytes from %d",loaded, total || 0);
-//         }
-//         function onsuccess(md5) {
-//           progress.attributes["hidden"] = true;
-//           if(md5)
-//             out.text = String.printf("done");
-//           else
-//             out.text = "error writing file";
-//         }
-//         function onerror(err) {
-//           out.text = String.printf("failure:%s", err.toString());
-//         }
-        
-//         progress.attributes["hidden"] = undefined; // show the progress bar
-        
-//         http.download(
-//             "https://terrainformatica.com/photos/last-diligence.jpg",
-//             self.url("photo.jpg"),
-//             onsuccess, onerror, onprogress );
-      
-//       };
+Global variable
+全局变量区
 
+**/
 var updateJson="NULL";
-var appVer = "v0.1"; //release tag name
+var appVer = "v0.2.0-build.2225-beta"; //release tag name
+var appDownloadUrl = "https://github.com/Styunlen/Styunlen-s-Minecraft-Server-Status-GUI/releases";
+
+/**
+
+Methods
+方法区
+
+**/
+event click $(#retry)
+{
+    $(#updateDescription).html = "正在检查更新...";
+    CheckUpdate();
+}
 function CheckUpdate()
 {
     function SetUpdateJson(data,status)
@@ -42,9 +29,9 @@ function CheckUpdate()
         updateJson = JSON.parse(data.toString());
         CheckUpdate();
     }
-    function SetErr(err, status)
+    function SetErr(err)
     {
-        $(#updateDescription).text = String.printf("异常: %s,状态: %d", err.toString(), status);
+        $(#updateDescription).html = String.printf("异常: <a href=\"https://docs.microsoft.com/zh-CN/windows/win32/wininet/wininet-errors\">%s</a> 重试<img #retry style=\"position:relative;left:10px;top:2px;width:16px;height:16px;\" src=\"retry.png\">", err.toString());
     }
     if(updateJson == "NULL")
     {
@@ -53,12 +40,27 @@ function CheckUpdate()
         view.request(params);
     }else
     {
-        if(updateJson[0].tag_name != appVer)
+        if((updateJson[0].tag_name != appVer)&&(updateJson[0].assets.length > 0))
         {
+            appDownloadUrl = updateJson[0].assets[0].browser_download_url;
+            var appDownloadCount = updateJson[0].assets[0].download_count;
+            var appUpdateTime = new Date(updateJson[0].published_at);
+            var appBrief = updateJson[0].body; //新版简介
             $(#updateDescription).text = String.printf("新版本{ %s }发布啦！", updateJson[0].tag_name);
+            $(#updateDescription).$append(<br/>);
+            var el = Element.create([button:{class:"btn btn-primary"},"立即更新"]);
+            el.subscribe("mouseup",function(){
+                view.dialog({
+                    url: self.url("win_download.html"),
+                    alignment: -5,
+                    parameters:{hostview: this.root.ns.view, downloadVer: updateJson[0].name, downloadBrief:appBrief,downloadUrl: appDownloadUrl, downloadCount: appDownloadCount, updateTime: appUpdateTime}
+                });
+                CountUsageTimes(appVer + "Update");
+            })
+            $(#updateDescription).append(el);
         }
         else{
-            $(#updateDescription).text = String.printf("{ %s }已是最新版本！", appver);
+            $(#updateDescription).text = String.printf("{ %s }已是最新版本！", appVer);
         }
     }
 }

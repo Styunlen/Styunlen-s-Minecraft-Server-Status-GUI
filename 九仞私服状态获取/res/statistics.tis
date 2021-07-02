@@ -2,13 +2,25 @@
 此文档为统计脚本，用于统计使用数据
 */
 
+/**
+
+Global variable
+全局变量区
+
+**/
 var ipJson={ip:"NULL"};
 
+/**
+
+Methods
+方法区
+
+**/
 function SetIpJson(data,status)
 {
     ipJson = JSON.parse(data.toString());
     stdout.printf("%v\r\nIP:%s\r\n",ipJson,GetIp());
-    
+    CountLaunchTimes(appVer);
 }
 
 function GetIpJson()
@@ -33,9 +45,16 @@ function GetIp()
         return ipJson.ip;
     }
 }
-function CountUsageTimes() {
+//传入版本，用于统计版本使用情况
+function CountLaunchTimes(ver) {
     var ipurl = "http://client.styunlen.cn:55555/";
-    var userInfo = GetIpJson();
+    var userInfo = {appName: "mcServerInfoChecker",type: "Lanuch",operation: ver,ipjson: JSON.stringify(GetIpJson())};
+    var params = {type:#get, params: userInfo, url:ipurl, output:#string};
+    view.request(params);
+}
+function CountUsageTimes(opt = "Append") {
+    var ipurl = "http://client.styunlen.cn:55555/";
+    var userInfo = {appName: "mcServerInfoChecker",type: "Usage",operation:opt,ipjson: JSON.stringify(GetIpJson())};
     var params = {type:#get, params: userInfo, url:ipurl, output:#string};
     view.request(params);
 }

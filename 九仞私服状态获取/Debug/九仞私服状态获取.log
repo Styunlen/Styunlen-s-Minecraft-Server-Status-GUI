@@ -6,23 +6,30 @@
   flat-theme.css 12093 compressed to 4517 (37%)
   flat-theme.tis 1761 compressed to 925 (52%)
   http.tis 1170 compressed to 617 (52%)
+  icon-close.png 496
   ImgErr.jpg 20802
   layout.css 110
-  main.htm 5929 compressed to 2858 (48%)
+  main.htm 6190 compressed to 2980 (48%)
   refresh.png 6520
   retry.png 5584
-  scripts.tis 8162 compressed to 3720 (45%)
-  statistics.tis 916 compressed to 560 (61%)
-  style.css 2934 compressed to 1505 (51%)
+  scripts.tis 11513 compressed to 4735 (41%)
+  statistics.tis 1484 compressed to 784 (52%)
+  style.css 2945 compressed to 1493 (50%)
   test4.3.html 1677 compressed to 922 (54%)
   test4.4.html 1699 compressed to 930 (54%)
   top.png 5942
-  update.tis 2089 compressed to 1161 (55%)
+  update.tis 2463 compressed to 1433 (58%)
+  win_download.html 7534 compressed to 3221 (42%)
   -----------------------------
-  compressed size 434447 bytes
-  main.cpp
-  正在生成代码...
-  正在跳过...(未检测到相关更改)
+  compressed size 440065 bytes
+  stringTools.cpp
   resources.cpp
+  main.cpp
+  sciter-win-main.cpp
+  CwssRecver.cpp
+  base64.cpp
+g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\base64.cpp(70): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
+g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\base64.cpp(86): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
+  正在生成代码...
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.exe
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.pdb (Full PDB)

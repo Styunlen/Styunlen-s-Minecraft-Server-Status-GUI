@@ -15,6 +15,7 @@ body{
   border-width: 2px;
   color: #fff;
   padding: 10px 20px 10px;
+  text-align: center;
 }
 .btn.btn-primary {
   background: #5755d9;
@@ -22,6 +23,8 @@ body{
   color: #fff;
   padding: 10px 20px 10px;
   font-size: 24px;
+  position: relative;
+  left:10dip;
 }
 .btn.btn-primary:focus {
   background: #5755d9;
@@ -30,7 +33,6 @@ body{
   padding: 10px 20px 10px;
   font-size: 24px;
   box-shadow: 0px 0px 1px 3px #fff;
-  transition: all 2s;
 }
 .btn.btn-primary:hover {
   background: #5755d9;
@@ -38,17 +40,17 @@ body{
   color: #fff;
   padding: 10px 20px 10px;
   font-size: 24px;
+  transform: scale(0.95,0.95); 
   /*box-shadow: 0px 0px 1px 2px #fff;*/
-  transition: all 2s;
 }
 .btn.btn-primary:active {
   background: #5755d9;
   border-color: #000;
-  transform: scale(0.95,0.95);
   color: #fff;
   padding: 10px 20px 10px;
   font-size: 24px;
   box-shadow: 0px 0px 1px 3px #fff;
+  transform: scale(0.90,0.90); 
 }
 cserstatus {  
   prototype: CSerStatus url(class.tis);
