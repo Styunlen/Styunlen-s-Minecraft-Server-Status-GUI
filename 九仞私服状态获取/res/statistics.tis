@@ -48,7 +48,7 @@ function GetIp()
 //传入版本，用于统计版本使用情况
 function CountLaunchTimes(ver) {
     var ipurl = "http://client.styunlen.cn:55555/";
-    var userInfo = {appName: "mcServerInfoChecker",type: "Lanuch",operation: ver,ipjson: JSON.stringify(GetIpJson())};
+    var userInfo = {appName: "mcServerInfoChecker",type: "Launch",operation: ver,ipjson: JSON.stringify(GetIpJson())};
     var params = {type:#get, params: userInfo, url:ipurl, output:#string};
     view.request(params);
 }

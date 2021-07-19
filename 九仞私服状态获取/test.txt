@@ -1,1 +1,1 @@
-{"description":{"extra":[{"color":"white","text":"   "},{"strikethrough":true,"color":"dark_gray","text":"        "},{"strikethrough":true,"color":"gray","text":" "},{"strikethrough":true,"color":"aqua","text":"[   "},{"bold":true,"color":"white","text":" 
+{"version":{"name":"BungeeCord 1.8.x-1.17.x","protocol":755},"players":{"max":2021,"online":1025},"description":{"extra":[{"color":"gray","text":"          "},{"color":"gray","text":" §b1.16.5 §7§l| "},{"color":"gold","text":"§l

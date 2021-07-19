@@ -122,6 +122,12 @@ string pack_varint(int d) {
 
 	return o;
 }
+uint8_t varint_code_len(string data)
+{
+	uint8_t i = 0;
+	while (data[i++] >> 7);
+	return i;
+}
 
 string pack_data(string d)
 {
@@ -304,16 +310,21 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	string ascAllRecv; //用于接收字符串
 	wstring allRecv; //用于保存转码后的字符串
 	iResult = 1;
+	string msgLen; //数据包长度
 	//Server返回的数据包中会包含数据包长度前缀，这段代码表示去除前缀，直到遇到json文本开头的{
 	for (int i = 0; iResult > 0 && recvbuf[0] != '{'; i++)
 	{
 		iResult = recv(ClientSocket, (char*)recvbuf, 1, 0);
+		msgLen += recvbuf[0];
 	}
+	uint8_t varintLen = varint_code_len(msgLen);
+	int varintVal;
 	ascAllRecv += recvbuf[0];
 #ifdef  _DEBUG
 	temp[tempIndex++] = recvbuf[0];
 #endif
 	iResult = recv(ClientSocket, (char*)recvbuf, 1024, 0);
+	bool bIsFirstRecv = true;
 	while (iResult > 0)
 	{
 		string logstr = "接收成功！ iResult";
@@ -328,9 +339,10 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 			tempIndex++;
 #endif
 		}
-		if (iResult != 1024)//小于1024说明是最后一次发送
+		if (iResult < 100 && !bIsFirstRecv)//小于100且不是第一次接收说明是最后一次发送
 			break;
 		iResult = recv(ClientSocket, (char*)recvbuf, 1024, 0);
+		bIsFirstRecv = false;
 	}
 	if (iResult == SOCKET_ERROR) {
 		string logstr = "接收失败";
