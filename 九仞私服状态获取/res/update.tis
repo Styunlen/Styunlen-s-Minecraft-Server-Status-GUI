@@ -8,7 +8,7 @@ Global variable
 
 **/
 var updateJson="NULL";
-var appVer = "v0.2.2-build.2230-beta"; //release tag name
+var appVer = "v0.3.1-build.1500"; //release tag name
 var appDownloadUrl = "https://github.com/Styunlen/Styunlen-s-Minecraft-Server-Status-GUI/releases";
 
 /**

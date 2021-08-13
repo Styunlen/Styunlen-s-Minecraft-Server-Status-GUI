@@ -128,6 +128,16 @@ uint8_t varint_code_len(string data)
 	while (data[i++] >> 7);
 	return i;
 }
+void varint_decode(string data, uint32_t* val, uint8_t len)
+{
+	int i = 0;
+	int offset = 0;
+	uint32_t result = 0;
+	result |= ((uint32_t)data[len - 1]) << (7 * (len - 1));
+	for (i = 0, offset = 0; i < len - 1; i++, offset += 7)
+		result |= (uint32_t)(data[i] & 0x7f) << offset;
+	*val = result;
+}
 
 string pack_data(string d)
 {
@@ -201,7 +211,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		ClientSocket = socket(pres->ai_family, pres->ai_socktype, pres->ai_protocol);
 		if (ClientSocket == INVALID_SOCKET) {
 			string logstr = "创建套接字失败 : ";
-			logstr +=  WsGetErrorInfo(WSAGetLastError());
+			logstr += WsGetErrorInfo(WSAGetLastError());
 			logstr += " \n";
 			pwin->call_function("DebugLog", logstr);
 			freeaddrinfo(result);
@@ -235,17 +245,13 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	}
 	freeaddrinfo(result);
 	char sendbuf[512]{ 0 };
-	byte egMcPingPacket[] =
-	{
-		0xf, 0x0, 0x0, 0x9, 0x6c, 0x6f, 0x63, 0x61, 0x6c, 0x68,
-		0x6f, 0x73, 0x74, 0x63, 0xdd, 0x1,
-	};
 	char str[64]{ 0 };
+	//HandShake Packet 协议Wiki https://wiki.vg/Server_List_Ping#1.6
 	string packstr;
 	packstr += '\x00';
 	packstr += '\x00';
 	packstr += pack_data(serverAddr.c_str()); //包装域名信息
-	char* portStrHex = new char[16]{0};
+	char* portStrHex = new char[16]{ 0 };
 	short port = short(atoi(serverPort.c_str()));
 	//sprintf_s(portStrHex,15, "%x", port);
 	portStrHex[0] = port >> 8;
@@ -256,6 +262,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	packstr = pack_data(packstr);
 	memcpy_s(str, 64, packstr.c_str(), packstr.length());
 	iResult = send(ClientSocket, (char*)str, packstr.length(), 0);
+	
 	pwin->call_function("DebugLog", WsGetErrorInfo());
 	cr->iGetFlag = cr->FSENDFAILED;
 	if (iResult == SOCKET_ERROR) {
@@ -279,7 +286,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 
 	//iResult = send(ClientSocket, strRequest.c_str(), strRequest.length(), 0);
 
-	byte sendRequest[2];
+	byte sendRequest[2];//Request Packet
 	sendRequest[0] = 0x1;
 	sendRequest[1] = 0x0;
 	iResult = send(ClientSocket, (char*)sendRequest, 2, 0);
@@ -307,27 +314,38 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	byte* temp = new byte[1024 * 64];
 	unsigned int tempIndex = 0;
 #endif
-	string ascAllRecv; //用于接收字符串
+	string ascAllRecv; //用于接收JSON字符串
 	wstring allRecv; //用于保存转码后的字符串
 	iResult = 1;
 	string msgLen; //数据包长度
-	//Server返回的数据包中会包含数据包长度前缀，这段代码表示去除前缀，直到遇到json文本开头的{
-	for (int i = 0; iResult > 0 && recvbuf[0] != '{'; i++)
+				   //Server返回的数据包中会包含数据包长度前缀，这段代码表示去除前缀，直到遇到json文本开头的{
+	//服务器Response包含以下字段 Packet,Len Packet ID(ID一般为0),Json Len
+	for (int i = 0; iResult > 0; i++)
 	{
 		iResult = recv(ClientSocket, (char*)recvbuf, 1, 0);
-		msgLen += recvbuf[0];
+		if (recvbuf[0] != '{') {
+			msgLen += recvbuf[0];
+		}
+		else
+		{
+			break;
+		}
+		if (recvbuf[0] == 0x00)
+			msgLen.clear();//过滤掉Packet Length和Packet ID，只保留Json Length
 	}
 	uint8_t varintLen = varint_code_len(msgLen);
-	int varintVal;
+	unsigned int varintVal;
+	varint_decode(msgLen, &varintVal, varintLen);
 	ascAllRecv += recvbuf[0];
 #ifdef  _DEBUG
 	temp[tempIndex++] = recvbuf[0];
 #endif
 	iResult = recv(ClientSocket, (char*)recvbuf, 1024, 0);
-	bool bIsFirstRecv = true;
+	unsigned long recvTotLen = 1;//在前面接收Json Length的时候已经接收了一个字符'{'
 	while (iResult > 0)
 	{
-		string logstr = "接收成功！ iResult";
+		recvTotLen += iResult;
+		string logstr = "接收成功！ iResult ";
 		logstr += to_string(iResult);
 		logstr += " \n";
 		pwin->call_function("DebugLog", logstr);
@@ -338,11 +356,12 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 			temp[tempIndex] = recvbuf[i];
 			tempIndex++;
 #endif
+			//BUG,不同的MC服务器通讯协议不同，发送的数据包总长度已用varint告知
+			//if (iResult < 100)//小于100且不是第一次接收说明是最后一次发送
+			//	break;
 		}
-		if (iResult < 100 && !bIsFirstRecv)//小于100且不是第一次接收说明是最后一次发送
-			break;
+		if (recvTotLen >= varintVal) break;
 		iResult = recv(ClientSocket, (char*)recvbuf, 1024, 0);
-		bIsFirstRecv = false;
 	}
 	if (iResult == SOCKET_ERROR) {
 		string logstr = "接收失败";
@@ -355,34 +374,34 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		return false;
 	}
 #ifdef  _DEBUG
-	{
-		FILE *fp;
-		string faviconPath = getCurrentWorkDir() + "\\ServerIcons\\";
-		if (_access(faviconPath.c_str(), 0) == -1)//文件夹不存在时，创建文件夹
-			_mkdir(faviconPath.c_str());
-		faviconPath = faviconPath + serverAddr.c_str() + ".txt";//将img写入到文件中
-		fopen_s(&fp, faviconPath.c_str(), "wb");
-		for (unsigned int i = 0; i < tempIndex; i++)
 		{
-			fprintf_s(fp, "%c", temp[i]);
+			FILE *fp;
+			string faviconPath = getCurrentWorkDir() + "\\ServerIcons\\";
+			if (_access(faviconPath.c_str(), 0) == -1)//文件夹不存在时，创建文件夹
+				_mkdir(faviconPath.c_str());
+			faviconPath = faviconPath + serverAddr.c_str() + ".txt";//将img写入到文件中
+			fopen_s(&fp, faviconPath.c_str(), "wb");
+			for (unsigned int i = 0; i < tempIndex; i++)
+			{
+				fprintf_s(fp, "%c", temp[i]);
+			}
+			fclose(fp);
 		}
-		fclose(fp);
-	}
 #endif
 	allRecv = UTF8ToUnicode(ascAllRecv);
 	pwin->call_function("DebugLog", "\n-----------------------------\n");
 	pwin->call_function("DebugLog", sciter::value(allRecv));
 	pwin->call_function("DebugLog", "\n-----------------------------\n");
 #ifdef  _DEBUG
-	delete[] temp;
+		delete[] temp;
 #endif
 	if ((allRecv.length() != 0) && (allRecv.find(L"online") != allRecv.npos))//获取服务器信息
 	{
-		cr->m_status.onlinePlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"),"online").c_str();
+		cr->m_status.onlinePlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"), "online").c_str();
 		cr->m_status.maxPlayer = GetJsonFieldFromJsonString(GetJsonFieldFromJsonString(allRecv, "players"), "max").c_str();
 		wstring motdJson = GetJsonFieldFromJsonString(allRecv, "description");
 		cr->m_status.motd += GetJsonFieldFromJsonString(motdJson, "text");
-		if(cr->m_status.motd == L"Can't find this field") //有的服务器没有text字段，而用translate字段代替，这里取出translate字段
+		if (cr->m_status.motd == L"Can't find this field") //有的服务器没有text字段，而用translate字段代替，这里取出translate字段
 		{
 			cr->m_status.motd.clear();
 			cr->m_status.motd += GetJsonFieldFromJsonString(motdJson, "translate");
@@ -390,9 +409,9 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 		}
 		else
 		{
-			cr->m_status.motd = (cr->m_status.motd == L"\"\"")? L"": cr->m_status.motd.substr(1, cr->m_status.motd.length() - 2);
+			cr->m_status.motd = (cr->m_status.motd == L"\"\"") ? L"" : cr->m_status.motd.substr(1, cr->m_status.motd.length() - 2);
 			//如果text为"",则直接清空，否则去除首尾引号
-			
+
 		}
 		if (pwin->call_function("GetMotdType", motdJson) == L"array")
 		{
@@ -405,7 +424,7 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	int iBase64Begin = faviconBase64.find_first_of(',') + 1;
 	faviconBase64 = faviconBase64.substr(iBase64Begin, faviconBase64.length() - iBase64Begin + 1);//取出img中的base64部分
 	iBase64Begin = faviconBase64.find(L"\\n");
-	while(iBase64Begin != faviconBase64.npos)//有的服务器真的奇葩，返回的favicon中包含换行符，此处代码用于去除换行符
+	while (iBase64Begin != faviconBase64.npos)//有的服务器真的奇葩，返回的favicon中包含换行符，此处代码用于去除换行符
 	{
 		faviconBase64.replace(iBase64Begin, 2, L"");
 		iBase64Begin = faviconBase64.find(L"\\n");
@@ -424,19 +443,21 @@ bool GetServerInfo(CwssRecver *cr, string serverAddr, string serverPort) {
 	fclose(fp);
 	cr->m_status.favicon = faviconPath;
 	OutputDebugStringW(faviconBase64.c_str());
-	fopen_s(&fp,"test.txt", "w");
-	fprintf_s(fp, "%ws", allRecv.c_str());
-	fclose(fp);
+	//fopen_s(&fp, "test.txt", "w");
+	//fprintf_s(fp, "%ws", allRecv.c_str());
+	//fclose(fp);
 	closesocket(ClientSocket);
 	cr->iGetFlag = cr->FSUCCESSFUL;
 	return true;
 }
 
 void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort, bool isRefresh = false/* 是否为刷新操作 */) {
-	WaitForSingleObject(cr->is_getting, INFINITE); //解决多个线程同时获取服务器信息时显示错乱的问题
 	bool flag = true;
 	cr->StatusClear();//清空上一次获取的信息
+	srand(time(NULL));
+	Sleep(rand() % 1000 + 1);
 	flag = GetServerInfo(cr, serverAddr, serverPort);//获取信息
+	WaitForSingleObject(g_cr.is_getting, INFINITE); //解决多个线程同时获取服务器信息时显示错乱的问题
 	if(!isRefresh)
 	{
 		if (!flag)
@@ -489,11 +510,15 @@ void ThFunc_AsyncGet(CwssRecver *cr,string serverAddr,string serverPort, bool is
 			pwin->call_function("EditServerInfo", sciter::value(val), sciter::value(cr->GetFavicon()), "<div id=\"statusDot\" style=\"display:inline-block;position:relative;left:10px;width:10px;height:10px;border-radius:5px;background:green;\"></div><span style=\"text-align:left;padding-left:20px;display:inline-block;width:40px;\">在线</span>", sciter::value(cr->GetMotd()));
 		}
 	}
-	ReleaseMutex(cr->is_getting);
+	delete cr;
+	ReleaseMutex(g_cr.is_getting);
 }
 bool CwssRecver::AsyncGet(string serverAddr, string serverPort, bool isRefresh = false/* 是否为刷新操作 */)
 {
-	thread t = thread(ThFunc_AsyncGet,this, serverAddr, serverPort, isRefresh);
+	//Debug Result: The limitation of thread appears to be uncertain.
+	//调试结果：最大并发线程数量应该无限制，但出于性能考虑，下个版本添加最大并发线程数量限制
+	CwssRecver *cr = new CwssRecver();
+	thread t = thread(ThFunc_AsyncGet, cr, serverAddr, serverPort, isRefresh);
 	t.detach();
 	return true;
 }
@@ -533,7 +558,7 @@ sciter::value frame::GetServerList()
 	char json[1024*8];
 	fscanf_s(fp, "%s", json,1024*8);
 	fclose(fp);
-	return sciter::value(json);
+	return (strlen(json)==0)? sciter::value("NULL"): sciter::value(json);
 }
 
 

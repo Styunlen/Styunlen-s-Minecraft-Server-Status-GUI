@@ -9,30 +9,31 @@
   icon-close.png 496
   ImgErr.jpg 20802
   layout.css 110
-  main.htm 6186 compressed to 2965 (47%)
+  main.htm 6183 compressed to 2963 (47%)
   refresh.png 6520
   retry.png 5584
   scripts.tis 11698 compressed to 4722 (40%)
-  statistics.tis 1484 compressed to 784 (52%)
+  statistics.tis 1484 compressed to 781 (52%)
   style.css 2983 compressed to 1506 (50%)
   test4.3.html 1677 compressed to 922 (54%)
   test4.4.html 1699 compressed to 930 (54%)
   top.png 5942
-  update.tis 2495 compressed to 1460 (58%)
+  update.tis 2490 compressed to 1455 (58%)
   win_download.html 7621 compressed to 3274 (42%)
   -----------------------------
-  compressed size 440130 bytes
+  compressed size 440120 bytes
   resources not changed
   base64.cpp
 base64.cpp(70): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
 base64.cpp(86): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
   CwssRecver.cpp
+CwssRecver.cpp(457): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
   sciter-win-main.cpp
   main.cpp
   resources.cpp
   stringTools.cpp
   正在生成代码
-  All 737 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
+  All 741 functions were compiled because no usable IPDB/IOBJ from previous compilation was found.
   已完成代码的生成
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Release\九仞私服状态获取.exe
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Release\九仞私服状态获取.pdb (Full PDB)

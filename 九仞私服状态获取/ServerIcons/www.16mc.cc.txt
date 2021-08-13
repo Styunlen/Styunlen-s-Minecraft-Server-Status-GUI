@@ -1,1 +1,0 @@
-{"version":{"name":"BungeeCord 1.8.x-1.15.x","protocol":578},"players":{"max":2019,"online":163},"description":{"extra":[{"text":""}],"text":""},"modinfo":{"type":"FML","modList":[]}}

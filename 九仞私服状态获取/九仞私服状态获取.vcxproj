@@ -197,6 +197,7 @@
     <ClInclude Include="base64.h" />
     <ClInclude Include="CwssRecver.h" />
     <ClInclude Include="include\sciter-x-window.hpp" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="stringTools.h" />
   </ItemGroup>
   <ItemGroup>
@@ -212,6 +213,9 @@
     </None>
     <None Include="res\scripts.tis" />
     <None Include="res\style.css" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="九仞私服状态获取.rc" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

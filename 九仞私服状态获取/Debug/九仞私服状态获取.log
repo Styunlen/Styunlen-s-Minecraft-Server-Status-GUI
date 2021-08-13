@@ -9,7 +9,7 @@
   icon-close.png 496
   ImgErr.jpg 20802
   layout.css 110
-  main.htm 6186 compressed to 2965 (47%)
+  main.htm 6183 compressed to 2963 (47%)
   refresh.png 6520
   retry.png 5584
   scripts.tis 11698 compressed to 4722 (40%)
@@ -18,12 +18,20 @@
   test4.3.html 1677 compressed to 922 (54%)
   test4.4.html 1699 compressed to 930 (54%)
   top.png 5942
-  update.tis 2495 compressed to 1460 (58%)
+  update.tis 2490 compressed to 1455 (58%)
   win_download.html 7621 compressed to 3274 (42%)
   -----------------------------
-  compressed size 440127 bytes
+  compressed size 440120 bytes
   resources not changed
+  stringTools.cpp
+  resources.cpp
+  main.cpp
+  sciter-win-main.cpp
   CwssRecver.cpp
-g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\cwssrecver.cpp(321): warning C4101: “varintVal”: 未引用的局部变量
+g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\cwssrecver.cpp(457): warning C4244: “参数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+  base64.cpp
+g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\base64.cpp(70): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
+g:\developer workdir\github\styunlen-s-minecraft-server-status-gui\九仞私服状态获取\base64.cpp(86): warning C4267: “=”: 从“size_t”转换到“unsigned char”，可能丢失数据
+  正在生成代码...
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.exe
   九仞私服状态获取.vcxproj -> G:\Developer WorkDir\Github\Styunlen-s-Minecraft-Server-Status-GUI\Debug\九仞私服状态获取.pdb (Full PDB)
